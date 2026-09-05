@@ -1,16 +1,0 @@
-Qwen3-1.7B  --  50 problems FROM THE TRAINING SET
-(these exact problems were in the LoRA training data)
-
-Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 95.22it/s]
-The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
-  [before] 4/50  [before] 8/50  [before] 12/50  [before] 16/50  [before] 20/50  [before] 24/50  [before] 28/50  [before] 32/50  [before] 36/50  [before] 40/50  [before] 44/50  [before] 48/50  [before] 50/50                                        Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 95.23it/s]
-  [after] 4/50  [after] 8/50  [after] 12/50  [after] 16/50  [after] 20/50  [after] 24/50  [after] 28/50  [after] 32/50  [after] 36/50  [after] 40/50  [after] 44/50  [after] 48/50  [after] 50/50                                        condition    train-set acc    cap%   tokens
---------------------------------------------
-before          3/50  = 0.06    0.20     1184
-after           4/50  = 0.08    0.18     1112
-
-  VERDICT: marginal gain on training data. Weak learning --
-  consistent with undertraining (loss was still falling at epoch 3).
-
-  sample training problem (gold = ৬.৬৭):
-  <think> প্রথমে, আমরা স্যাম পড়াশুনা এবং বিরতি মিলিয়ে সময় খুঁজে বের করবো: 1. **বিজ্ঞান**: - বিজ্ঞানে ১ ঘণ্টা = 60 মিনিট - বিরতি: ১৫ মিনিট - মোট সময় = 60 + 15 = 75 মিনিট 2. **গণিত**: - গণিতে 80 মিনিট - বিরতি: 15 মিনিট - মোট সময় = 80 + 15 = 95 মিনিট 3. **সাহিত্য**: - সাহিত্যে 40 মিনিট - বিরতি: 15 ম

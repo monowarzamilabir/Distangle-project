@@ -1,5 +1,0 @@
-MODEL: Qwen3-1.7B before  thinking=False
-style       cap%     acc    tokens      bn
-------------------------------------------
-raw         1.00    0.08      1024    0.75
-chat        0.50    0.08       848    0.81

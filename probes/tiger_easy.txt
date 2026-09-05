@@ -1,5 +1,0 @@
-MODEL: TigerLLM-1B-it  thinking=False
-style       cap%     acc    tokens      bn
-------------------------------------------
-raw         0.00    0.00       258    0.89
-chat        0.08    0.00       320    0.84

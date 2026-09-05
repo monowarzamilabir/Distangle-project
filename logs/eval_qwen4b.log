@@ -1,48 +1,0 @@
-GPU NVIDIA GeForce RTX 5060 Ti | transformers 4.57.6
-Eval items: 500 | by difficulty: {'medium': 127, 'hard': 129, 'easy': 145, 'olympiad': 99}
-Overlap check: 873 train rows | id overlap 0 | text overlap 0
-PASS  no exact overlap (will not catch paraphrases)
-
-==================================================================
-Qwen3-4B  [before]   38 to do, 62 done   (subsample n=100)
-==================================================================
-Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  67%|██████▋   | 2/3 [00:00<00:00, 19.41it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00, 28.57it/s]
-  prompt_style=chat  batch=2  max_new=2048  stop=['<|endoftext|>', '<|im_end|>']
-The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
-  10/38  35.1s/item  eta 16 min
-  20/38  32.2s/item  eta 10 min
-  30/38  31.1s/item  eta 4 min
-  38/38  29.0s/item  eta 0 min
-  freed; VRAM now 0.01 GB
-  Wrote results_v2\preds_qwen3-4b_before.jsonl
-
-==================================================================
-Qwen3-4B  [after]   100 to do, 0 done   (subsample n=100)
-==================================================================
-Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00, 127.62it/s]
-  LoRA adapter merged.
-  prompt_style=chat  batch=2  max_new=2048  stop=['<|endoftext|>', '<|im_end|>']
-  10/100  35.2s/item  eta 53 min
-  20/100  26.1s/item  eta 35 min
-  30/100  30.5s/item  eta 36 min
-  40/100  28.7s/item  eta 29 min
-  50/100  27.4s/item  eta 23 min
-  60/100  29.4s/item  eta 20 min
-  70/100  29.0s/item  eta 15 min
-  80/100  29.2s/item  eta 10 min
-  90/100  28.6s/item  eta 5 min
-  100/100  28.7s/item  eta 0 min
-  freed; VRAM now 0.01 GB
-  Wrote results_v2\preds_qwen3-4b_after.jsonl
-
-model                  depth    cond        n     acc   cap%   fmt     bn
---------------------------------------------------------------------------
-Qwen3-4B               shallow  before    100   0.450   0.06     0   0.88
-Qwen3-4B               shallow  after     100   0.380   0.07     0   0.83
-
-model                  cond         easy    medium      hard  olympiad
---------------------------------------------------------------------------
-Qwen3-4B               before      0.467     0.583     0.345     0.412
-Qwen3-4B               after       0.500     0.333     0.310     0.353
-
-Wrote results_v2\eval_summary.csv and results_v2\accuracy_by_difficulty.csv

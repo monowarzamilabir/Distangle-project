@@ -1,9 +1,0 @@
-`torch_dtype` is deprecated! Use `dtype` instead!
-filtered to difficulty=easy: 145 available
-MODEL          : Qwen3-4B  (Qwen/Qwen3-4B)
-chat_template  : True
-declared eos   : '<|im_end|>' (id=151645)
-stop tokens    : ['<|endoftext|>', '<|im_end|>'] -> [151643, 151645]
-
-Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00, 124.95it/s]
-The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
