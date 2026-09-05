@@ -5,10 +5,13 @@ how many items changed outcome in either direction. Notice that no model
 retained even half of what it already knew, which is why the small net
 changes in Table~\ref{tab:main} understate how much the adapter moved.}
 \label{tab:retention}
-\centering\small
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
 \begin{tabular}{|l|c|c|c|c|}
 \hline
-\textbf{Model} & \textbf{Correct before} & \textbf{Retained} & \textbf{Retention} & \textbf{Items flipped} \\
+\textbf{Model} & \textbf{Correct} & \textbf{Kept} & \textbf{Reten-} & \textbf{Items} \\
+               & \textbf{before}  &               & \textbf{tion}   & \textbf{flipped} \\
 \hline
 Qwen3-4B & 112 & 56 & 50\% & 99 / 250 \\
 Qwen3-1.7B & 42 & 18 & 43\% & 51 / 250 \\

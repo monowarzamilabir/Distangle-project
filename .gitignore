@@ -16,3 +16,14 @@ terminal_output/
 # Live monitor logs; the per-run logs in logs/ are kept on purpose
 train_live.log
 eval_live.log
+
+
+previouscontext*
+.claude/
+results/
+results_v2/full500/
+*.ps1
+eval.ps1
+rebuild.ps1
+run_detached.ps1
+draft_results.py

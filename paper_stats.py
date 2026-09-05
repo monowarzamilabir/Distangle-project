@@ -279,10 +279,16 @@ R = [r"\begin{table}[htbp]",
      r"how many items changed outcome in either direction. Notice that no model",
      r"retained even half of what it already knew, which is why the small net",
      r"changes in Table~\ref{tab:main} understate how much the adapter moved.}",
-     r"\label{tab:retention}", r"\centering\small",
+     r"\label{tab:retention}", r"\centering", r"\footnotesize",
+     # The headers, not the data, were what overflowed the column in the
+     # two-column layout. Stacking them onto two lines and tightening
+     # tabcolsep brings the table back inside \columnwidth.
+     r"\setlength{\tabcolsep}{4pt}",
      r"\begin{tabular}{|l|c|c|c|c|}", r"\hline",
-     r"\textbf{Model} & \textbf{Correct before} & \textbf{Retained} & "
-     r"\textbf{Retention} & \textbf{Items flipped} \\", r"\hline"]
+     r"\textbf{Model} & \textbf{Correct} & \textbf{Kept} & \textbf{Reten-} &"
+     r" \textbf{Items} \\",
+     r"               & \textbf{before}  &               & \textbf{tion}   &"
+     r" \textbf{flipped} \\", r"\hline"]
 for k in ["qwen3-4b", "qwen3-1.7b", "qwen3-0.6b", "tigerllm-1b",
           "titulm-3b-it", "titulm-1b-it"]:
     r = by[k]
@@ -323,7 +329,7 @@ w("tab_difficulty.tex", P)
 
 
 # Table: Bengali adherence
-B = [r"\begin{table}[htbp]",
+B = [r"\begin{table*}[t]",
      r"\caption{Bengali character ratio in generated output, before and after",
      r"fine-tuning on Bengali reasoning traces. $\Delta$ is the mean paired",
      r"difference in percentage points with its 95\% confidence interval; $p$ is",
@@ -336,11 +342,11 @@ B = [r"\begin{table}[htbp]",
      r"\textbf{$\Delta$ (pp), 95\% CI} & \textbf{$p$} \\", r"\hline"]
 for k in ORDER:
     r = by[k]
-    B.append("%s & %.1f\\%% & %.1f\\%% & %+.1f [%+.1f, %+.1f] & %s \\\\"
+    B.append("%s & %.1f\\%% & %.1f\\%% & $%+.1f$ [$%+.1f$, $%+.1f$] & %s \\\\"
              % (r["label"], r["bn_b"] * 100, r["bn_a"] * 100,
                 r["bn_delta"] * 100, r["bn_ci"][0] * 100, r["bn_ci"][1] * 100,
                 ("$<10^{-6}$" if r["bn_p"] < 1e-6 else "%.4f" % r["bn_p"])))
-B += [r"\hline", r"\end{tabular}", r"\end{table}"]
+B += [r"\hline", r"\end{tabular}", r"\end{table*}"]
 w("tab_adherence.tex", B)
 
 
