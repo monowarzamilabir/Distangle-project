@@ -1,0 +1,28 @@
+{
+ "ratio_qwen_over_titullm": 3.15,
+ "qwen3_4b_truncated_at_2048": 104,
+ "n_sequences": 873,
+ "rows": [
+  {
+   "tokenizer": "TituLLM-1B",
+   "vocab": 170497,
+   "median": 395,
+   "p95": 871,
+   "max": 1498
+  },
+  {
+   "tokenizer": "TigerLLM-1B",
+   "vocab": 262145,
+   "median": 425,
+   "p95": 930,
+   "max": 1431
+  },
+  {
+   "tokenizer": "Qwen3",
+   "vocab": 151669,
+   "median": 1244,
+   "p95": 2395,
+   "max": 3543
+  }
+ ]
+}

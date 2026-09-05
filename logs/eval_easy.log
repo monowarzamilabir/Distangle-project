@@ -1,0 +1,29 @@
+GPU NVIDIA GeForce RTX 5060 Ti | transformers 4.57.6
+Eval items: 500 | by difficulty: {'medium': 127, 'hard': 129, 'easy': 145, 'olympiad': 99}
+Overlap check: 873 train rows | id overlap 0 | text overlap 0
+PASS  no exact overlap (will not catch paraphrases)
+
+==================================================================
+Qwen3-1.7B-easy  [after]   100 to do, 0 done   (subsample n=100)
+==================================================================
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 105.24it/s]
+  LoRA adapter merged.
+  prompt_style=chat  batch=4  max_new=2048  stop=['<|endoftext|>', '<|im_end|>']
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+  20/100  16.9s/item  eta 23 min
+  40/100  15.9s/item  eta 16 min
+  60/100  16.2s/item  eta 11 min
+  80/100  15.4s/item  eta 5 min
+  100/100  15.4s/item  eta 0 min
+  freed; VRAM now 0.01 GB
+  Wrote results_v2\preds_qwen3-1.7b-easy_after.jsonl
+
+model                  depth    cond        n     acc   cap%   fmt     bn
+--------------------------------------------------------------------------
+Qwen3-1.7B-easy        shallow  after     100   0.080   0.25     1   0.84
+
+model                  cond         easy    medium      hard  olympiad
+--------------------------------------------------------------------------
+Qwen3-1.7B-easy        after       0.067     0.125     0.103     0.000
+
+Wrote results_v2\eval_summary.csv and results_v2\accuracy_by_difficulty.csv

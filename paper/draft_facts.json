@@ -1,0 +1,12 @@
+{
+ "fisher_scale": {
+  "qwen3-0.6b_vs_qwen3-1.7b": 1.0292585100428735e-06,
+  "qwen3-1.7b_vs_qwen3-4b": 1.2645562838109055e-11,
+  "qwen3-0.6b_vs_qwen3-4b": 7.423653355372574e-30
+ },
+ "fisher_depth": {
+  "tigerllm-1b_vs_titulm-1b": 0.3634378700931979,
+  "tigerllm-1b_vs_titulm-1b-it": 0.0057809779926279534,
+  "titulm-3b-it_vs_qwen3-1.7b": 1.6887109894362284e-10
+ }
+}

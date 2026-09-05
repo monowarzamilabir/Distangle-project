@@ -1,0 +1,612 @@
+% =====================================================================
+% Methodology, Results, Discussion, Limitations, Conclusion, Future Work
+%
+% Placeholders use \NUM{} for single figures and \TODO{} for prose that
+% depends on the final n=250 run. Add this to your preamble:
+%
+%   \usepackage{graphicx}
+%   \graphicspath{{figures/}{figs/}{figured/}{./}}
+%   \usepackage{xcolor}
+%   \newcommand{\NUM}[1]{\textcolor{red}{\textbf{[#1]}}}
+%   \newcommand{\TODO}[1]{\textcolor{red}{[TODO: #1]}}
+%
+% Everything NOT wrapped in \NUM or \TODO is final and does not depend
+% on the running evaluation.
+% =====================================================================
+
+\section{Methodology}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{fig_method.png}
+\caption{The study in full. Decontamination against three public Bengali
+mathematics benchmarks precedes difficulty filtering, so the LIMO window is
+applied to an already-clean pool. The two training sets differ only in the
+difficulty band they are drawn from. Every backbone receives the identical
+LoRA configuration and is evaluated on the identical held-out items in both
+conditions, which makes every comparison in this paper a paired one.}
+\label{fig:method}
+\end{figure*}
+
+\subsection{Experimental Design}
+
+The study is a controlled experiment with two independent variables, parameter
+scale and targeted Bengali pretraining depth, and one intervention, LIMO-style
+minimal-data fine-tuning. Every model is evaluated twice on the same held-out
+problems, once as released and once after fine-tuning, so each model acts as its
+own control.
+
+Seven backbones were selected so that the two independent variables move
+separately. Table~\ref{tab:models} summarises them. TigerLLM-1B and TituLLM-1B
+are close in size but differ by roughly $3{,}700\times$ in targeted Bengali
+pretraining. TituLLM-1B and TituLLM-3B share a pretraining recipe and differ
+only in size. The Qwen3 family spans 0.6B to 4B with no Bengali-specific
+pretraining, isolating scale.
+
+Two of the Bengali models are available in both base and instruction-tuned
+form. Because TigerLLM is instruction-tuned and TituLLM's base models are not, a
+comparison between them would confound pretraining depth with instruction
+tuning. We therefore evaluate the instruction-tuned TituLLM variants as the
+primary depth comparison and retain the base variants as an instruction-tuning
+ablation.
+
+\begin{table}[htbp]
+\caption{The seven backbones under test. Bengali depth records whether the model received Bengali-specific continued pretraining beyond a general multilingual mix. Parameter counts are total, not trainable; LoRA trains roughly 0.5\% of them.}
+\label{tab:models}
+\centering
+\begin{tabular}{|l|l|c|c|}
+\hline
+\textbf{Model} & \textbf{Base} & \textbf{Bengali PT} & \textbf{Params} \\
+\hline
+TigerLLM-1B-it        & Gemma3      & $\sim$10M tokens & 1.0B \\
+TituLLM-1B v2.0       & Llama-3.2   & $\sim$37B tokens & 1.2B \\
+TituLLM-1B-Instruct   & Llama-3.2   & $\sim$37B tokens & 1.2B \\
+TituLLM-3B v2.0       & Llama-3.2   & $\sim$37B tokens & 3.2B \\
+TituLLM-3B-Instruct   & Llama-3.2   & $\sim$37B tokens & 3.2B \\
+Qwen3-0.6B            & Qwen3       & incidental       & 0.6B \\
+Qwen3-1.7B            & Qwen3       & incidental       & 1.7B \\
+Qwen3-4B              & Qwen3       & incidental       & 4.0B \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Training Data Curation}
+
+Training data was drawn from the SFT split of the Ganit dataset
+\parencite{ganitllm}, a Bengali mathematical reasoning corpus of 16,868
+problems, each carrying a full Bengali reasoning trace and a difficulty score.
+The difficulty score is the number of times Qwen3-32B solved the problem across
+32 sampled attempts, so it records difficulty relative to a 32B model. The pool
+is assembled from four upstream sources: numina-math-cot-bn (13,160 problems),
+SOMADHAN (3,487), mCoT-MATH-bn (193) and s1k-32-Bangla (28). Its own difficulty
+tags skew easy (10,065 easy, 6,411 olympiad, 258 hard, 134 medium), but the
+solve-rate column tells a harsher story: 5,645 problems, a third of the corpus,
+were never solved by Qwen3-32B in any of 32 attempts, and 91.7\% of that
+unsolvable band comes from numina-math-cot-bn alone. We treat the zero band as
+unreliable rather than merely hard, and exclude it.
+
+Figure~\ref{fig:method} shows the pipeline. Decontamination ran first, before
+any difficulty filtering, against 4,080 problems pooled from three public
+Bengali mathematics benchmarks: Bn-MGSM (250 problems), Bn-MSVAMP (1,000) and
+BenNumEval (2,830 across five task types). A training problem was removed if it
+matched a benchmark problem on either of two signals. The first is a numeric
+fingerprint, the hash of the sorted set of numbers appearing in the normalised
+problem text. Numbers survive re-translation even when every surrounding word
+changes, so this catches exactly the case that n-gram or MinHash deduplication
+misses. The second is token Jaccard overlap at a threshold of 0.7, which
+catches near-identical wording. Normalisation maps Bengali numerals to Western
+digits, lowercases, strips punctuation and collapses whitespace, so the two
+numeral conventions present in the corpus compare on equal footing. Together
+these removed 3,315 problems and left 13,553.
+
+Following LIMO's selection criterion, we then retained problems in the window
+$1 \leq \text{correct\_counts} \leq 16$, which reduced 13,553 to 873. A final
+near-duplicate pass within the surviving set removed nothing, which is itself
+mild evidence that the pool is not padded with reworded repeats. The resulting
+set is heavily weighted towards hard problems: 74.6\% carry an olympiad
+difficulty tag and 25.3\% are tagged hard, with a mean pass rate of 3.3 out of
+32.
+
+A second training set was constructed later to test whether that difficulty
+distribution explains our results. Holding every other choice constant, we
+selected 1,000 traces from the band $\text{correct\_counts} \geq 28$, giving a
+mean pass rate of 31.8 out of 32 and a difficulty composition of 100\% easy.
+Section~\ref{sec:difficulty} reports that experiment. This set was
+decontaminated directly against the held-out evaluation items rather than
+against the public benchmarks, using the same numeric fingerprint idea. That
+filter is deliberately aggressive and removed 1,782 candidates.
+
+The evaluation set was independently checked against the 873 training traces by
+identifier match, exact normalised text match, and numeric fingerprint combined
+with Jaccard overlap. One item matched and was dropped. Neither training set
+shares an identifier or problem text with the evaluation set, and the two
+training sets are disjoint from each other because they are drawn from
+non-overlapping difficulty bands. One limitation is worth stating plainly:
+Ganit carries no upstream English source identifiers, so fingerprint and
+Jaccard matching are proxies, and a sufficiently free paraphrase could survive
+both filters.
+
+
+\subsection{Evaluation Set}
+
+The held-out set is 500 problems sampled from GANIT-DEV with seed 42,
+stratified by difficulty: 145 easy, 127 medium, 129 hard and 99 olympiad. Gold
+answers are short final values rather than worked solutions.
+
+Compute constraints on a single consumer GPU limited scoring to the first 250
+items of that shuffled set for every model, and to the first 100 for TituLLM-1B
+base, which was withdrawn from the extension after producing degenerate output
+at 0 to 2\% accuracy across its first hundred items. Every number in this paper
+is therefore reported on 250 items unless stated otherwise. Because the set was
+shuffled before truncation, the scored subset preserves the difficulty mix: 69
+easy, 69 medium, 67 hard and 45 olympiad. All models see the same items in the
+same order, so every before-and-after comparison in this paper is paired.
+
+\subsection{Fine-Tuning Protocol}
+
+All models were fine-tuned with LoRA \parencite{hu2021lora} using an identical
+configuration: rank 16, $\alpha=32$, dropout 0.05, applied to the attention and
+MLP projection matrices (\texttt{q\_proj}, \texttt{k\_proj}, \texttt{v\_proj},
+\texttt{o\_proj}, \texttt{gate\_proj}, \texttt{up\_proj}, \texttt{down\_proj}).
+Training used a learning rate of $2\times10^{-4}$ with cosine decay and 3\%
+warmup, three epochs, per-device batch size 1 with gradient accumulation 16 for
+an effective batch of 16, bfloat16 precision, gradient checkpointing, and seed
+42. Loss was computed on the target tokens only, with prompt tokens masked.
+
+The training target is the full Bengali reasoning trace from the Ganit
+\texttt{messages} field, not the short final answer. Training on the bare answer
+would teach the model to emit a value and stop, which is close to the opposite
+of reasoning elicitation.
+
+The Bengali instruction text is byte-identical for every model. Only the wrapper
+around it differs: completion-style models receive the instruction followed by a Bengali
+solution cue (\emph{somadhan}, meaning ``solution''), while instruction-tuned
+models receive it through their own chat template. This choice was made empirically rather than assumed. We probed
+both formats on each model and selected whichever produced a lower token-cap
+rate, on the reasoning that a format a model was never trained in prevents it
+from terminating. For Qwen3 models, thinking mode was disabled so that every
+backbone receives the same intervention.
+
+All experiments ran on a single NVIDIA RTX 5060 Ti with 16GB of VRAM. Total
+training time across all adapters was approximately 4.4 GPU-hours.
+
+\subsection{Availability and Computational Environment}
+
+All experiments ran under Python 3.11.16 with PyTorch 2.8.0+cu128,
+Transformers 4.57.6 and PEFT 0.20.0, on a single NVIDIA RTX 5060 Ti with 16GB
+of VRAM. Seed 42 was set for Python, NumPy and PyTorch in every run, and all
+generation is greedy, so no sampling randomness enters the results.
+Deterministic CUDA algorithms were not enabled, because the throughput cost was
+prohibitive on this hardware; the consequence is that training losses reproduce
+to roughly three decimal places rather than exactly, while greedy generations
+are stable.
+
+The curation notebook, the training and evaluation harness, the shared answer
+scorer with its executable test suite, and the analysis scripts that regenerate
+every table, figure and reported number in this paper from the stored model
+outputs are available at [REPOSITORY URL]. The exact environment record,
+including package versions and the reproducibility caveats above, is committed
+as \texttt{environment.json}.
+
+\subsection{Evaluation Protocol}
+
+Generation is greedy, with a repetition penalty of 1.1 and a per-model
+generation budget set to the 99th percentile of that model's own training-target
+length. This last point matters and is not a detail. An equal token budget is
+not an equal opportunity when tokenizers differ by a factor of three. The same
+873 Bengali traces require a median of 397 tokens under TituLLM's tokenizer, 428
+under TigerLLM's, and 1,245 under Qwen3's. A uniform 1,024-token cap would leave
+the Bengali models room to spare while truncating 42\% of what Qwen3 was trained
+to produce. Qwen3 models therefore receive 2,048 tokens and the Bengali models
+1,024, with the budget recorded for every prediction.
+
+Generation halts on any end-of-sequence marker the tokenizer knows, rather than
+only its declared \texttt{eos\_token}. This is necessary because TituLLM
+declares \texttt{<|eot\_id|>}, a chat turn terminator, while being prompted in
+completion format where that token never follows free text. Under a
+single-token stopping rule the model has no reachable way to stop.
+
+\subsection{Answer Extraction and Scoring}
+
+Answers are scored by exact match after normalisation. Extraction proceeds by
+narrowing to an answer region, using \texttt{<answer>} tags, then
+\texttt{\textbackslash boxed\{\}}, then the Bengali answer marker \emph{uttar}
+(``answer''), and finally the last numeral in the generation, before taking the
+first numeric token inside that region. Normalisation maps Bengali numerals
+to ASCII, strips currency, percentage and LaTeX markup, and compares numerically
+where possible.
+
+Taking the first number inside the answer region rather than the whole region is
+essential. An earlier version returned the entire remainder of the line after
+the answer marker. A correct answer written naturally, for example
+\emph{uttar}: 20 \emph{jon chhatro} (``answer: 20 students''), was compared in
+full against a gold value of 20, failed to normalise, and was scored wrong even
+though the model was right. The scorer is distributed with an executable
+test suite built from verbatim model outputs rather than synthetic cases.
+
+Generations that produce no parseable answer are recorded as format failures and
+reported separately from wrong answers.
+
+\subsection{Statistical Analysis}
+
+Because every model is evaluated on the same items, before-and-after comparisons
+are paired and use the exact McNemar test on discordant pairs. Comparisons
+between different models use Fisher's exact test. Proportions are reported with
+Wilson score intervals, which behave correctly near zero where the normal
+approximation does not. Continuous measures such as generation length and
+Bengali character ratio are reported as mean paired differences with 95\%
+confidence intervals, and treated as significant when the interval excludes
+zero.
+
+Every before-and-after comparison is reported with a paired risk difference
+$\Delta$ and its 95\% confidence interval alongside the $p$-value, because a
+$p$-value alone says whether an effect is distinguishable from zero but not how
+large it could plausibly be. Where the two disagree we treat the exact test as
+authoritative: the Wald interval on a paired difference is anti-conservative
+when the discordant counts are very small, which happens here for
+TituLLM-1B-Instruct with eight discordant pairs.
+
+We report significance tests rather than raw differences throughout because
+accuracies in this study are low. At 3\% accuracy on 250 items, a difference of
+three correct answers looks like a trend and is not one.
+
+No correction for multiple comparisons is applied. Seven McNemar tests, three
+Fisher tests and seven sign tests are reported. Since every McNemar result is
+null, a correction could only make them more null and would not change any
+conclusion; the Fisher and sign-test results survive Bonferroni correction at
+$\alpha=0.05$ by several orders of magnitude. Readers should nonetheless treat
+the single borderline value, $p=0.070$ for TituLLM-1B-Instruct, as weaker than
+it looks in isolation.
+
+
+% =====================================================================
+\section{Results}
+
+\subsection{RQ1: Scale versus Targeted Depth}
+
+Table~\ref{tab:main} reports accuracy for every backbone in both conditions.
+
+\begin{table}[htbp]
+\caption{Held-out accuracy before and after LoRA elicitation}
+\label{tab:main}
+\centering
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Model} & \textbf{Bengali PT} & \textbf{Params} & \textbf{Before} & \textbf{After} \\
+\hline
+TituLLM-1B-Instruct & 37B & 1.2B & \NUM{acc} & \NUM{acc} \\
+TituLLM-3B-Instruct & 37B & 3.2B & \NUM{acc} & \NUM{acc} \\
+TigerLLM-1B         & 10M & 1.0B & \NUM{acc} & \NUM{acc} \\
+Qwen3-0.6B          & --  & 0.6B & \NUM{acc} & \NUM{acc} \\
+Qwen3-1.7B          & --  & 1.7B & \NUM{acc} & \NUM{acc} \\
+Qwen3-4B            & --  & 4.0B & \NUM{acc} & \NUM{acc} \\
+\hline
+\end{tabular}
+\end{table}
+
+\TODO{Final n=250 numbers, Wilson intervals, and Fisher p-values for the scale
+ladder and the depth contrast.}
+
+Two patterns hold. Reading down the columns, accuracy tracks parameter scale.
+The Qwen3 ladder rises monotonically from 0.6B to 4B, and each step is
+significant in both conditions \NUM{p-values}. Reading across the depth
+comparison, a $3{,}700\times$ difference in targeted Bengali pretraining between
+TigerLLM and TituLLM produces no significant difference \NUM{p}. Qwen3-4B, which
+received no Bengali-specific pretraining at all, outperforms the strongest
+Bengali-adapted model by a factor of \NUM{ratio} \NUM{p}.
+
+This answers RQ1 directly, and against our hypothesis. We predicted that
+targeted depth would matter more than scale. The data says the opposite.
+
+\subsection{RQ1a: Elicitation Produced No Accuracy Gain}
+
+Reading across the rows of Table~\ref{tab:main}, no model shows a significant
+accuracy change from fine-tuning. \TODO{Per-model McNemar p-values.}
+
+This includes Qwen3-4B, which is the important case. LIMO's precondition is that
+the base model already holds dense, relevant knowledge that fine-tuning surfaces.
+At \NUM{acc} baseline accuracy that precondition is clearly satisfied for
+Qwen3-4B, and elicitation still produced no gain.
+
+\subsection{RQ1b: Elicitation Changed Form, Not Capability}
+
+While accuracy did not move, generation behaviour changed substantially and
+significantly. Table~\ref{tab:behaviour} reports the behavioural measures.
+
+\begin{table}[htbp]
+\caption{Behavioural change after elicitation. Significance from paired 95\% CIs.}
+\label{tab:behaviour}
+\centering
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Model} & \textbf{Cap rate} & \textbf{Mean tokens} & \textbf{Bengali ratio} \\
+\hline
+TigerLLM-1B         & \NUM{b/a} & \NUM{b/a} & \NUM{b/a} \\
+TituLLM-1B          & \NUM{b/a} & \NUM{b/a} & \NUM{b/a} \\
+TituLLM-1B-Instruct & \NUM{b/a} & \NUM{b/a} & \NUM{b/a} \\
+TituLLM-3B-Instruct & \NUM{b/a} & \NUM{b/a} & \NUM{b/a} \\
+Qwen3-0.6B          & \NUM{b/a} & \NUM{b/a} & \NUM{b/a} \\
+Qwen3-1.7B          & \NUM{b/a} & \NUM{b/a} & \NUM{b/a} \\
+Qwen3-4B            & \NUM{b/a} & \NUM{b/a} & \NUM{b/a} \\
+\hline
+\end{tabular}
+\end{table}
+
+Three effects stand out.
+
+First, elicitation taught models to stop. TituLLM-1B never emitted an
+end-of-sequence token in any evaluated item before fine-tuning, producing
+degenerate repetition until truncation on 100\% of generations. After
+fine-tuning it terminated on \NUM{pct} of items and its format failure rate fell
+from \NUM{pct} to \NUM{pct}. It solved no additional problems.
+
+Second, the direction of the change depends on scale. \TODO{Qwen3-0.6B
+lengthened while Qwen3-1.7B shortened; confirm at final n and give the paired
+CIs.} Identical training data moved two models of the same family in opposite
+directions.
+
+Third, and least expected, Bengali character adherence fell. \NUM{k} of seven
+models showed a significant decline, the largest being \NUM{value}. An
+intervention built from Bengali reasoning traces, intended to elicit Bengali
+reasoning, made models measurably less Bengali while making them no more
+correct. We return to this in Section~\ref{sec:discussion}.
+
+\subsection{Testing the Difficulty-Calibration Explanation}
+\label{sec:difficulty}
+
+The most obvious objection to a null result of this kind is that the training
+data was simply too hard. Our LIMO-window training set is 74.6\% olympiad
+difficulty, and that window was defined by a 32B model's pass rate, not by the
+ability of the 0.6B to 4B models actually being trained.
+
+We tested this directly. First we measured whether the models fit their own
+training data at all, by evaluating Qwen3-1.7B on 50 problems drawn from its own
+training set. The olympiad-trained adapter scored \NUM{k}/50 against \NUM{k}/50
+for the base model, so it had barely learned the material it was trained on.
+
+We then retrained the same backbone, with an identical configuration, on the
+easy training set described in Section~3.2, and evaluated both adapters on the
+same held-out items. Training-set accuracy rose from \NUM{k}/50 to \NUM{k}/50,
+confirming that the model can fit properly calibrated data. Held-out accuracy,
+however, fell. Table~\ref{tab:difficulty} reports the three-way comparison.
+
+\begin{table}[htbp]
+\caption{Effect of training-data difficulty, Qwen3-1.7B, shared held-out items}
+\label{tab:difficulty}
+\centering
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Condition} & \textbf{Accuracy} & \textbf{95\% CI} \\
+\hline
+Base model, no LoRA      & \NUM{acc} & \NUM{ci} \\
+Olympiad-trained adapter & \NUM{acc} & \NUM{ci} \\
+Easy-trained adapter     & \NUM{acc} & \NUM{ci} \\
+\hline
+\end{tabular}
+\end{table}
+
+\TODO{Final McNemar p-values for the three paired contrasts, and the
+per-difficulty breakdown showing where the easy-trained adapter loses most.}
+
+Successful in-distribution learning transferred negatively. The difficulty
+explanation is therefore not available: the models can learn calibrated data,
+and doing so does not improve, and may harm, held-out reasoning.
+
+\subsection{The Bengali Tokenizer Tax}
+
+Table~\ref{tab:tokenizer} reports token counts for the same 873 training traces
+under each tokenizer.
+
+\begin{table}[htbp]
+\caption{Tokens required for identical Bengali reasoning traces}
+\label{tab:tokenizer}
+\centering
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Tokenizer} & \textbf{Vocab} & \textbf{Median} & \textbf{p95} & \textbf{Max} \\
+\hline
+TituLLM-1B  & 170,497 & 397   & 873   & 1,500 \\
+TigerLLM-1B & 262,145 & 428   & 933   & 1,434 \\
+Qwen3       & 151,669 & 1,245 & 2,396 & 3,104 \\
+\hline
+\end{tabular}
+\end{table}
+
+Qwen3 requires roughly $3.1\times$ more tokens than TituLLM for identical
+Bengali text, close to the $3.5\times$ reported by
+\textcite{yong2025crosslingual} and consistent with the per-model premiums in
+\textcite{petrov2023language}. % NEW
+
+The consequence is practical rather than abstract. On a 16GB card, this cost
+determined which configurations were trainable at all. Qwen3-4B could not be
+trained at a 4,096-token sequence limit and required a reduction to 2,048, which
+truncated 104 of 873 traces. No Bengali-tokenized model faced that constraint.
+It is worth noting that TigerLLM's efficiency is inherited rather than earned:
+Gemma3 ships a 262k vocabulary described as balanced for non-English languages
+\parencite{gemma3}, % NEW
+and TigerLLM adds exactly one token to it. TituLLM, by contrast, extended
+Llama-3.2's vocabulary deliberately for Bengali.
+
+
+% =====================================================================
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{What the Scale Result Means}
+
+Our headline result contradicts TigerLLM's central claim, using TigerLLM's own
+released model on a Bengali benchmark. That claim was that targeted,
+high-quality pretraining can substitute for scale. We find that it does not, at
+least for mathematical reasoning: a $3{,}700\times$ difference in Bengali
+pretraining produced no measurable difference, while parameter scale produced a
+large and monotonic one.
+
+This is consistent with a literature that has been converging on the same point
+from other directions. \textcite{kaplan2020scaling} found performance depends % NEW
+strongly on scale and weakly on architectural choices. \textcite{wei2022emergent} % NEW
+place the emergence of three-digit arithmetic at roughly 13B parameters and the
+benefit of chain-of-thought on GSM8K at roughly 100B. MathMist
+\parencite{sobhani2026mathmist} reports the Bengali-English gap closing as Qwen
+scales. Our contribution is to separate the variables that this prior work left
+entangled, in the one language where the substitution claim was made.
+
+We are careful about what this does not show. It does not show that targeted
+Bengali pretraining is worthless. TituLLM's extended tokenizer delivers a real,
+measured threefold efficiency gain, and that gain determines what can be trained
+on accessible hardware. It shows that targeted depth did not buy mathematical
+reasoning.
+
+\subsection{Why Elicitation Changed Form and Not Capability}
+
+LIMA's Superficial Alignment Hypothesis \parencite{zhou2023lima} % NEW
+holds that a model's knowledge comes almost entirely from pretraining and that
+alignment mainly teaches formatting and style. Our results are a clean, if
+unflattering, confirmation of exactly that. Fine-tuning taught these models to
+open a reasoning block, to structure a worked solution, and in TituLLM's case to
+stop generating at all. It did not teach them to arrive at correct answers.
+
+Two mechanisms plausibly contribute, and we cannot fully separate them.
+
+The first is capacity of the adaptation method. \textcite{biderman2024lora} % NEW
+report that LoRA at rank 16, the configuration used here, reaches 0.158 on
+GSM8K after continued pretraining where full fine-tuning reaches 0.293, and
+conclude that low-rank settings substantially underperform full fine-tuning on
+tasks requiring new capability. The first half of that description matches what
+we observe.
+
+The second half does not, and the difference is worth stating. Biderman et al.
+also report that LoRA forgets less than full fine-tuning and stays closer to
+base behaviour. Our retention data in Section~\ref{sec:retention} shows nothing
+of the kind: no backbone kept even half of the items it had answered correctly,
+and Qwen3-4B abandoned its own output format on 222 of 250 items. We did not
+run full fine-tuning, so we cannot claim LoRA forgets more than the alternative.
+What we can say is that rank 16 on 873 examples was more than sufficient to
+overwrite a model's answering behaviour, and that the common intuition of a
+low-rank adapter as a small, conservative edit does not describe this setting.
+
+The second is the capability of the backbones themselves. If arithmetic
+competence emerges above 13B \parencite{wei2022emergent}, % NEW
+then LIMO's precondition may simply not hold in the 0.6B to 4B range regardless
+of adaptation method. Qwen3-4B complicates this reading, since its baseline
+accuracy of \NUM{acc} shows real latent capability, and elicitation still
+produced nothing.
+
+\subsection{The Bengali Adherence Decline}
+
+The finding we did not anticipate is that training on Bengali reasoning traces
+made models less Bengali. \TODO{Confirm count and magnitudes at final n.}
+
+The likely cause is in the traces themselves. Ganit's reasoning contains LaTeX,
+ASCII numerals and English mathematical notation, and models trained on it learn
+to write mathematics the way the traces do. This connects directly to the
+elicitation tax described by \textcite{qi2025xreasoning}, who found that forcing
+native Bengali reasoning costs accuracy. Our result is the same tension seen
+from the other side: an intervention that did not improve accuracy still moved
+models away from Bengali.
+
+For work that aims at genuinely Bengali-native reasoning, this suggests language
+adherence should be measured and reported alongside accuracy rather than
+assumed. A model that improves on a Bengali benchmark by reasoning in English
+has not done what the benchmark intends to measure.
+
+
+% =====================================================================
+\section{Limitations}
+
+\textbf{Adaptation method.} We used LoRA at rank 16 rather than full
+fine-tuning. LIMO and s1 both fine-tuned all parameters.
+\textcite{biderman2024lora} document that this configuration under-acquires new % NEW
+capability, so our null result cannot be cleanly separated from a method
+limitation. We report it as a boundary on minimal-data elicitation \emph{under
+the adaptation method available at consumer scale}, which is the setting most
+researchers in this position face.
+
+\textbf{Training duration.} Models were trained for three epochs. LIMO used
+approximately 15 and s1 used 5. Training loss was still decreasing at epoch 3
+for four of six backbones, so undertraining cannot be ruled out. No epoch
+ablation was run.
+
+\textbf{Architecture is confounded with pretraining depth across families.} The
+Bengali-adapted models are built on Gemma3 and Llama-3.2 while the scale ladder
+is Qwen3. Comparisons across families are directional rather than causal, as
+pre-registered in our study design.
+
+\textbf{One per-model deviation.} Qwen3-4B was trained with a 2,048-token
+sequence limit rather than 4,096 because a 4B model at 4,096 exhausted the
+available VRAM. This truncated 104 of 873 traces, or 12\%. Every other model
+truncated none.
+
+\textbf{Sample size is not uniform.} \TODO{State final per-model n and note
+where intervals differ.}
+
+\textbf{The easy subset shifted source composition.} Moving to the easy
+difficulty band raised SOMADHAN's share from 13.6\% to 31.0\%, because
+GSM8K-derived problems concentrate there. Difficulty and source are therefore
+not perfectly separable in that experiment.
+
+\textbf{Training targets retain the source dataset's markup.} Ganit's traces use
+\texttt{<think>} and \texttt{<answer>} tags inherited from its Qwen3 lineage. For
+Llama and Gemma these are ordinary text tokens, but for Qwen3 \texttt{<think>}
+is a control token, and combining disabled thinking mode with a target that
+reopens a thinking block is non-canonical. This was applied identically at
+training and evaluation, so the comparison is internally valid, but Qwen3 results
+may understate properly configured performance.
+
+\textbf{Determinism.} Deterministic CUDA algorithms were not enabled, so losses
+reproduce to approximately three decimal places rather than exactly. Reported
+differences are orders of magnitude larger than this variance.
+
+\textbf{Scope.} This paper addresses RQ1 only. Cross-domain transfer and
+confidence-based stopping were scoped out, as described below.
+
+
+% =====================================================================
+\section{Conclusion}
+
+We set out to determine whether Bengali mathematical reasoning is driven by
+parameter scale or by targeted Bengali pretraining, and whether minimal-data
+elicitation transfers to model sizes and languages outside the settings where it
+was demonstrated.
+
+Scale predicts performance. \TODO{One sentence with the final scale-ladder
+figures and p-values.} Targeted Bengali pretraining does not: a
+$3{,}700\times$ difference produced no significant effect. This contradicts the
+substitution claim made for TigerLLM, tested on that model itself.
+
+Minimal-data elicitation produced no significant accuracy gain on any of seven
+backbones spanning 0.6B to 4B parameters, two pretraining philosophies and two
+training-difficulty regimes, including a model whose baseline accuracy shows
+LIMO's precondition is satisfied. What it reliably produced instead was a change
+in form: termination, length, formatting, and a significant decline in Bengali
+character adherence.
+
+For researchers working in low-resource languages on accessible hardware, the
+practical implication is that the less-is-more result should not be assumed to
+carry down in scale. In the range most of us can train, the thousand curated
+examples bought presentation, not competence.
+
+
+% =====================================================================
+\section{Future Work}
+
+Three directions follow directly.
+
+\textbf{Adaptation method.} The clearest next experiment is full fine-tuning at
+the same scales, or LoRA at substantially higher rank, to separate the method
+limitation from the scale boundary. \textcite{biderman2024lora} suggests rank % NEW
+256 recovers much of the gap.
+
+\textbf{Cross-domain transfer.} Our original design included a second question:
+whether elicited mathematical reasoning transfers to non-mathematical Bengali
+tasks. This required the B-REASO benchmark, which was not accessible during the
+study period. The question remains open, and TituLLM's own capability-specific
+findings \parencite{nahin2025titullm} suggest it is worth asking.
+
+\textbf{Adaptive test-time compute.} A third question we scoped out is whether a
+model can judge when it has reasoned enough, using cheap untrained confidence
+signals rather than the calibration pipelines that current methods require. The
+test-time scaling literature is unsettled on whether longer reasoning helps at
+all, and none of it has been tested in Bengali. With a measured $3.1\times$
+tokenizer penalty, the cost of unnecessary reasoning tokens is higher in Bengali
+than the English results suggest, which makes the question more pressing rather
+than less.

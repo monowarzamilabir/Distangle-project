@@ -1,0 +1,5 @@
+MODEL: Qwen3-4B  thinking=False
+style       cap%     acc    tokens      bn
+------------------------------------------
+raw         1.00    0.25      1024    0.93
+chat        0.42    0.00       768    0.85

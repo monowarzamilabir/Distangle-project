@@ -1,0 +1,19 @@
+{
+  "python": "3.11.16",
+  "platform": "Windows-10-10.0.26100-SP0",
+  "torch": "2.8.0+cu128",
+  "cuda_runtime": "12.8",
+  "cudnn": 91002,
+  "transformers": "4.57.6",
+  "peft": "0.20.0",
+  "gpu": "NVIDIA GeForce RTX 5060 Ti, 591.86, 16311 MiB",
+  "seed": 42,
+  "deterministic_algorithms": false,
+  "reproducibility_notes": [
+    "Greedy decoding (do_sample=False); no sampling randomness.",
+    "torch.use_deterministic_algorithms() NOT enabled: CUDA reductions use atomics whose order varies, so losses reproduce to ~3 decimals, not exactly.",
+    "Eval batching affects left-padding and can shift a token on borderline items; runs interrupted at different points batch differently.",
+    "Qwen3-1.7B and Qwen3-4B training were resumed from checkpoints after power interruptions. Qwen3-1.7B's reported final_train_loss (0.1262) averages only post-resume steps and is NOT comparable to the others; recover the full curve from _checkpoints/*/trainer_state.json.",
+    "Qwen3-4B trained at max_seq_length=2048 (104/873 traces truncated); all other models at 4096 with zero truncation."
+  ]
+}

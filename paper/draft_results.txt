@@ -1,0 +1,49 @@
+====================================================================================================
+PAPER STATISTICS   (paired on the ids each model finished in both conditions)
+====================================================================================================
+model                     n          before           after         delta [95% CI]  McNemar
+----------------------------------------------------------------------------------------------------
+TituLLM-1B (base)       100   2.0 [ 0.6, 7.0]   0.0 [ 0.0, 3.7]     -2.0 [ -4.7, +0.7]    0.500
+TituLLM-1B-Instruct     250   0.4 [ 0.1, 2.2]   2.8 [ 1.4, 5.7]     +2.4 [ +0.2, +4.6]    0.070
+TigerLLM-1B             250   4.4 [ 2.5, 7.7]   2.4 [ 1.1, 5.1]     -2.0 [ -4.8, +0.8]    0.267
+TituLLM-3B-Instruct     250   1.2 [ 0.4, 3.5]   1.2 [ 0.4, 3.5]     +0.0 [ -1.9, +1.9]    1.000
+Qwen3-0.6B              250   3.6 [ 1.9, 6.7]   6.0 [ 3.7, 9.7]     +2.4 [ -0.7, +5.5]    0.210
+Qwen3-1.7B              250  16.8 [12.7,21.9]  18.0 [13.7,23.2]     +1.2 [ -4.4, +6.8]    0.780
+Qwen3-4B                250  44.8 [38.8,51.0]  39.6 [33.7,45.8]     -5.2 [-13.0, +2.6]    0.228
+----------------------------------------------------------------------------------------------------
+
+SCALE LADDER, unpaired Fisher exact (untuned condition)
+  Qwen3-0.6B     3.6%  vs  Qwen3-1.7B    16.8%   p = 1.03e-06
+  Qwen3-1.7B    16.8%  vs  Qwen3-4B      44.8%   p = 1.26e-11
+  Qwen3-0.6B     3.6%  vs  Qwen3-4B      44.8%   p = 7.42e-30
+
+DEPTH COMPARISONS, unpaired Fisher exact (untuned condition)
+  TigerLLM-1B            4.4% (n=250)  vs  TituLLM-1B (base)      2.0% (n=100)   p = 0.3634
+  TigerLLM-1B            4.4% (n=250)  vs  TituLLM-1B-Instruct    0.4% (n=250)   p = 0.005781
+  TituLLM-3B-Instruct    1.2% (n=250)  vs  Qwen3-1.7B            16.8% (n=250)   p = 1.689e-10
+
+BENGALI CHARACTER RATIO, mean paired difference with 95% CI and sign test
+  TituLLM-1B (base)       90.7% ->  82.1%   delta  -8.6 [-15.8, -1.5]    85down/ 15up  sign p = 4.8e-13
+  TituLLM-1B-Instruct     98.3% ->  81.3%   delta -17.0 [-19.6,-14.3]   232down/ 18up  sign p = 1.5e-48
+  TigerLLM-1B             87.0% ->  82.7%   delta  -4.3 [ -6.4, -2.3]   170down/ 80up  sign p = 1.3e-08
+  TituLLM-3B-Instruct     97.9% ->  80.8%   delta -17.1 [-19.7,-14.6]   237down/ 13up  sign p = 2e-54
+  Qwen3-0.6B              85.6% ->  87.8%   delta  +2.1 [ -1.2, +5.4]   164down/ 86up  sign p = 9.2e-07
+  Qwen3-1.7B              89.3% ->  84.1%   delta  -5.1 [ -7.3, -2.9]   175down/ 75up  sign p = 2.2e-10
+  Qwen3-4B                87.0% ->  82.0%   delta  -5.0 [ -6.4, -3.6]   179down/ 71up  sign p = 6.2e-12
+
+TOKEN-CAP RATE
+  TituLLM-1B (base)      100.0% ->  47.0%
+  TituLLM-1B-Instruct     19.6% ->  44.8%
+  TigerLLM-1B              7.2% ->   9.6%
+  TituLLM-3B-Instruct      8.0% ->  29.2%
+  Qwen3-0.6B               4.8% ->  36.8%
+  Qwen3-1.7B              24.0% ->  22.4%
+  Qwen3-4B                 8.8% ->   7.6%
+
+ANSWER RETENTION
+  Qwen3-4B               right 112  kept  56  retention  50%  flipped  99/250
+  Qwen3-1.7B             right  42  kept  18  retention  43%  flipped  51/250
+  Qwen3-0.6B             right   9  kept   4  retention  44%  flipped  16/250
+  TigerLLM-1B            right  11  kept   2  retention  18%  flipped  13/250
+  TituLLM-3B-Instruct    right   3  kept   0  retention   0%  flipped   6/250
+  TituLLM-1B-Instruct    right   1  kept   0  retention   0%  flipped   8/250

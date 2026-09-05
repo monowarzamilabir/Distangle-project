@@ -1,0 +1,120 @@
+================================================================
+PROMPT FOR NOTEBOOKLM — literature matrix for newly added papers
+Copy everything below the line into NotebookLM after uploading
+the new PDFs as sources.
+================================================================
+
+
+You are helping me extend the literature review of a research paper. I have
+uploaded several papers as sources. For EACH source, produce a structured entry
+using the exact format specified below.
+
+## Context of my paper (use this to judge relevance)
+
+Title: "Disentangling Scale from Targeted Pretraining Depth: Testing the
+Less-Is-More Hypothesis for Bengali Mathematical Reasoning"
+
+I fine-tuned seven language model backbones (0.6B–4B parameters) with LoRA on
+~1000 curated Bengali mathematical reasoning traces from the Ganit dataset, in
+a LIMO-style minimal-data elicitation setup, and evaluated them on a 500-problem
+held-out Bengali maths benchmark before and after fine-tuning.
+
+My backbones fall into two groups:
+- Bengali-adapted models: TigerLLM-1B (Gemma3 base, ~10M curated Bengali
+  textbook tokens) and TituLM-1B/3B (Llama-3.2 base, ~37B general Bengali
+  tokens), including instruction-tuned variants.
+- General multilingual models with no Bengali-specific pretraining:
+  Qwen3-0.6B, Qwen3-1.7B, Qwen3-4B.
+
+My main findings, which each source should be assessed against:
+
+1. Model scale determined performance; targeted Bengali pretraining depth did
+   not. Qwen3 scaled 2% -> 14% -> 45% accuracy across 0.6B/1.7B/4B (every step
+   significant). A 3,700x difference in Bengali pretraining between TigerLLM
+   (10M tokens) and TituLM (37B tokens) produced no significant difference
+   (p = 0.553). Qwen3-4B, with no Bengali-specific pretraining, beat the best
+   Bengali-adapted model by 12x.
+
+2. LIMO-style minimal-data elicitation produced no significant accuracy change
+   on any of the seven backbones, including Qwen3-4B where LIMO's stated
+   precondition of latent capability clearly holds (45% baseline).
+
+3. Elicitation reliably changed output FORM without changing capability:
+   termination behaviour, output length, and adopted formatting all shifted
+   significantly, while accuracy did not. Bengali-character adherence fell
+   significantly in 5 of 7 models.
+
+4. Training on difficulty-matched (easier) data improved training-set fit but
+   significantly WORSENED held-out accuracy (p = 0.0385) — successful
+   in-distribution learning transferred negatively.
+
+5. Qwen3's tokenizer requires ~3.1x more tokens than TituLM's extended-vocabulary
+   tokenizer for identical Bengali text, which determines what can be trained on
+   consumer hardware.
+
+## Output format — repeat this block for EVERY source
+
+---
+### [Exact paper title]
+
+**Citation:** Authors (Year). Full title. Venue/arXiv ID. [exact, as printed]
+
+**Q1 — Problem and importance:** What problem does it address and why does the
+paper argue it matters?
+
+**Q2 — Data:** Datasets used, with sizes and languages. State "not specified" if
+absent.
+
+**Q3 — Key concepts or signals:** The central technical ideas, metrics or
+mechanisms introduced.
+
+**Q4 — Method or pipeline:** The approach, as a short ordered sequence of steps.
+
+**Q5 — Baselines and ablations:** What it compares against, and which ablations
+it runs.
+
+**Q6 — Metrics:** Exactly which metrics are reported.
+
+**Q7 — Results:** The headline numbers, WITH the numbers themselves. Quote
+figures exactly as printed; do not round or paraphrase them.
+
+**Q8 — Limitations:** Limitations the authors state, plus any you can identify
+from the reported setup.
+
+**Q9 — Code and data availability:** Links or statements of availability.
+
+**Model scale studied:** Parameter counts of every model evaluated. This is
+critical for my paper — I need to know whether findings were demonstrated at
+scales comparable to my 0.6B–4B range or only at larger scales.
+
+**Languages studied:** Which languages, and whether Bengali or other Indic
+languages are included.
+
+**Relevance to my findings:** State which of my five findings (numbered above)
+this source supports, contradicts, or contextualises, and how. Be specific and
+cite the relevant result from the source. If it is relevant to none of them,
+say so plainly.
+
+**Direct quotes worth citing:** 1–3 short verbatim quotes (under 25 words each)
+that I could cite in a literature review, each with its section or page
+location.
+
+---
+
+## Rules
+
+- Answer ONLY from the uploaded sources. If a source does not state something,
+  write "not stated in the source" rather than inferring or filling from general
+  knowledge.
+- Give exact numbers from the papers. Do not round, estimate, or convert.
+- If two sources disagree, note the disagreement explicitly and say which source
+  says what.
+- Do not summarise sources you were not given.
+- Keep each field concise: 1–3 sentences except Q7 (results) and the relevance
+  field, which may be longer.
+- At the very end, add a short section titled "CROSS-SOURCE OBSERVATIONS"
+  covering:
+  (a) which model scales are represented across all sources, and whether any
+      demonstrate their central claim at or below 4B parameters;
+  (b) any direct disagreements between sources;
+  (c) which of my five findings currently has the weakest supporting literature.

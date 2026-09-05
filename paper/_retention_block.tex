@@ -1,0 +1,64 @@
+\subsection{What the Fine-Tuning Actually Did}
+\label{sec:retention}
+
+A null result invites the objection that nothing happened at all: that the
+adapter never took, or that LoRA at rank 16 is too small to move a model. The
+item-level data rules that out. A great deal happened. It simply was not
+learning to reason.
+
+Table~\ref{tab:retention} reports answer retention, meaning the share of items
+a model answered correctly before fine-tuning that it still answered correctly
+afterwards. If 873 traces were teaching mathematical reasoning, retention
+should be high and the gains should sit on top of it. That is not the pattern.
+
+\input{paper/tab_retention}
+
+Qwen3-4B answered 112 items correctly before tuning and kept 56 of them. It
+also answered 43 items correctly that it had failed before. In total 99 of 250
+items changed their outcome, close to 40\% of the evaluation set, while net
+accuracy moved by 13 items. The same shape holds down the scale: no model
+retained even half of what it already knew. The adapter did not add a layer of
+competence on top of the base model. It substantially rewrote which problems
+the model could solve, and the replacement set happened to be slightly worse
+than the original.
+
+The mechanism is visible in the generated text. Before fine-tuning, Qwen3-4B
+closed 225 of 250 completions with the Bengali word for ``answer'' followed by
+its result, a convention it adopted on its own, since the evaluation prompt
+asks only that the model answer in Bengali and specifies no format. After
+fine-tuning it did so on 3 of 250. In its place the model adopted the format of
+the training corpus: Ganit's traces are written as a \texttt{<think>} block
+followed by an \texttt{<answer>} block, and after tuning every one of the 250
+completions opened a \texttt{<think>} block. Median output length fell from
+1,046 tokens to 887, the proportion of Bengali characters fell from 87.0\% to
+82.0\%, and the number of explicit step markers roughly halved.
+
+This is the Superficial Alignment Hypothesis \parencite{zhou2023lima} observed
+from the unfavourable side. In LIMA's setting a small number of examples
+exposes capability the pretrained weights already hold, and the result is a
+useful model. Here the same small number of examples reshaped format, length,
+language mix and stopping behaviour just as comprehensively, and exposed
+nothing, because at this scale there was little underneath to expose. Style
+transferred completely. Reasoning did not transfer at all.
+
+\subsubsection*{A sensitivity check on the format change}
+
+Because the output format changed, it is worth confirming that the accuracy
+drop is not an artifact of answer extraction. Our scorer looks for an
+\texttt{<answer>} block first, then a boxed expression, then the Bengali answer
+marker, and only if none of those are present does it fall back to taking the
+last number in the completion. After fine-tuning, 230 of 250 Qwen3-4B
+completions contained a well-formed \texttt{<answer>} block and were therefore
+parsed by the strongest branch of the extractor. The remaining 20 exhausted the
+generation budget inside the \texttt{<think>} block and were scored by the weak
+fallback. Of the 56 items Qwen3-4B lost, 45 produced a well-formed
+\texttt{<answer>} that was simply wrong.
+
+To bound the effect, we recomputed accuracy crediting every fallback-scored
+item as correct, which is the most generous assumption available. Post-tuning
+accuracy under that assumption is 46.8\%, against a measured 39.6\% and a
+pre-tuning 44.8\%. The true value therefore lies somewhere between a loss of
+5.2 points and a gain of 2.0 points. We cannot sign the effect, which is
+consistent with the exact McNemar test returning $p=0.228$, and the substantive
+conclusion is unchanged in either direction: 873 curated traces did not produce
+a detectable improvement in Bengali mathematical reasoning at this scale.

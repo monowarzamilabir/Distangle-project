@@ -1,0 +1,150 @@
+% =====================================================================
+% FRONT AND BACK MATTER
+%
+%   1. Abstract              -> goes before \section{Introduction}
+%   2. Contributions         -> end of the Introduction, or its own
+%                               subsection right after it
+%   3. AI Assistance         -> before the bibliography, alongside any
+%                               Acknowledgements
+%
+% All evaluation is complete. Every model except TituLLM-1B base, which
+% was dropped from the extension, is reported on the full n=250. The
+% numbers here match paper/draft_results.txt as of the final run.
+%
+% READ THE AI ASSISTANCE STATEMENT BEFORE YOU SUBMIT IT. It describes
+% what actually happened on this project, but your department may have
+% its own required wording or a form to fill in instead. Edit it so it
+% is true of you, not just true in general.
+% =====================================================================
+
+
+% ------------------------------------------------------------------ 1
+\begin{abstract}
+Bengali is spoken by more than 230 million people and remains thinly
+represented in language model pretraining. Two recent efforts respond to this
+by pretraining smaller models heavily on Bengali, on the implicit premise that
+targeted language depth can stand in for parameter scale. We test that premise
+directly. Seven backbones from 0.6B to 4B parameters are compared on held-out
+Bengali mathematical reasoning: four with deep Bengali pretraining (TituLLM and
+TigerLLM) and three with only incidental Bengali coverage (Qwen3). Each is then
+fine-tuned with LoRA on 873 curated Bengali reasoning traces, selected in the
+LIMO difficulty window and decontaminated against three public Bengali
+mathematics benchmarks, and re-evaluated on the identical items so that every
+comparison is paired. Scale predicts performance and pretraining depth does
+not. Accuracy rises from 3.6\% to 16.8\% to 44.8\% across the Qwen3 ladder,
+while the Bengali-specialised models stay between 0.4\% and 4.4\% across a
+threefold parameter range. A 1.7B model with no Bengali continued pretraining
+outscores a 3.2B model that has it, at every difficulty tier. Minimal-data
+elicitation moves no model significantly, and a control experiment rules out
+difficulty miscalibration as the explanation: training on easy, well-matched
+problems is significantly worse than training on hard ones. Fine-tuning did
+reshape output format, length and stopping behaviour without improving
+correctness, which we read as a negative-case instance of the Superficial
+Alignment Hypothesis. We also quantify a Bengali tokenizer tax of roughly
+$3.1\times$ and show it is separable from reasoning ability: the two most
+token-efficient models here are the two weakest at mathematics.
+\end{abstract}
+
+
+% ---------------------------------------------------------------- 1b
+% KEYWORDS. Your PDF shows a plain LaTeX class, no IEEE or ACM markers,
+% so the generic form is active and the two common template forms are
+% commented below. Use whichever your template expects; delete the rest.
+%
+% Ordered broad to narrow. If you are held to five, keep the first five:
+% they cover the language, the task, the model class and the two
+% variables the paper actually separates.
+
+\vspace{0.5em}
+\noindent\textbf{Keywords:} Bengali; low-resource languages; mathematical
+reasoning; large language models; model scale; continued pretraining;
+parameter-efficient fine-tuning; tokenizer efficiency
+
+% IEEE template:
+% \begin{IEEEkeywords}
+% Bengali, low-resource languages, mathematical reasoning, large language
+% models, model scale, continued pretraining, parameter-efficient
+% fine-tuning, tokenizer efficiency
+% \end{IEEEkeywords}
+
+% ACM template:
+% \keywords{Bengali; low-resource languages; mathematical reasoning;
+% large language models; model scale; continued pretraining;
+% parameter-efficient fine-tuning; tokenizer efficiency}
+
+% Swap-ins if a reviewer wants different emphasis:
+%   multilingual NLP, LoRA, instruction tuning, data-efficient alignment,
+%   superficial alignment hypothesis, scaling laws, cross-lingual transfer
+
+
+% ------------------------------------------------------------------ 2
+% DUPLICATE WARNING: paper_draft_sections.tex already ends its
+% Introduction with a contributions list. Use ONE of the two, not both.
+% They say the same things; that one sits in the natural place, this one
+% is here in case your template wants contributions near the abstract.
+\subsection*{Contributions}
+
+\begin{itemize}
+\item We separate parameter scale from targeted Bengali pretraining depth,
+      which prior Bengali model releases confound, and show that scale
+      accounts for the variation in mathematical reasoning while depth does
+      not. The clearest case is a 1.7B model with no Bengali continued
+      pretraining outscoring a 3.2B model that has it, 16.8\% against 1.2\%,
+      at easy, medium, hard and olympiad difficulty alike.
+
+\item We report the first paired before-and-after test of LIMO-style
+      minimal-data elicitation in Bengali, across seven backbones on identical
+      held-out items. No model moves significantly. We argue this bounds the
+      claim to the sub-4B range rather than refuting the method, since every
+      model here sits below the scale at which arithmetic competence is
+      reported to emerge.
+
+\item We rule out the most natural objection to that null with a controlled
+      experiment. Holding backbone, adapter configuration, seed and evaluation
+      items fixed, training on easy, difficulty-matched problems performs
+      significantly worse than training on hard ones, so the null does not
+      follow from having selected data that was too difficult.
+
+\item We show that the fine-tuning was not inert even where accuracy did not
+      move. It reshaped format, output length and stopping behaviour, most
+      starkly in a model that never emitted a stop token before tuning and did
+      so on more than half of items afterwards while its accuracy fell. We read
+      this as the Superficial Alignment Hypothesis observed in a setting where
+      there was little underlying capability to expose.
+
+\item We measure a Bengali tokenizer tax of roughly $3.1\times$ on identical
+      text, document the hardware ceilings it imposes on a single 16GB
+      consumer card, and show that token efficiency and reasoning ability are
+      separable properties rather than a single axis of Bengali competence.
+
+\item We release the full pipeline: the curation and decontamination code, the
+      training and evaluation harness, the shared answer scorer with its test
+      suite, and the analysis scripts that regenerate every number and figure
+      in this paper from the stored model outputs.
+\end{itemize}
+
+
+% ------------------------------------------------------------------ 3
+\section*{Statement on AI Assistance}
+
+Anthropic's Claude was used as a coding and writing assistant throughout this
+project. Its contributions were: implementing and debugging the training and
+evaluation harness, including the LoRA training script, the evaluation loop,
+the shared answer scorer and the statistical comparison scripts; diagnosing
+several implementation faults, among them a tokenizer and embedding mismatch
+that crashed evaluation of one model, and two defects in answer extraction, one
+of which had been silently scoring correct arithmetic as incorrect; generating
+the figures; and drafting and editing the prose of this manuscript.
+
+The research questions, the experimental design, the data curation pipeline and
+the selection of models and datasets are the authors' own. Every number
+reported here was produced by scripts in the project repository, and outputs
+were checked against raw model completions rather than accepted from summary
+statistics alone. No data were generated, altered or imputed by an AI system: every number
+reported here comes from a model checkpoint evaluated on stored held-out items,
+and no finding, citation or result was produced by the assistant without a
+corresponding computation in the repository. Interpretation of the results,
+including the decision about what the null result does and does not license, is
+the authors' own. The authors reviewed all AI-assisted text and code, and take
+full responsibility for the content of this paper, including any remaining
+errors.

@@ -1,0 +1,56 @@
+{
+  "generated_utc": "2026-08-31T11:07:59.319816+00:00",
+  "output_path": "C:\\Users\\PC\\791\\heldout_math_eval.jsonl",
+  "n_items": 500,
+  "seed": 42,
+  "sources_requested": [
+    "ganit_dev"
+  ],
+  "items_loaded_per_source": {
+    "ganit_dev": 776
+  },
+  "target_n": 500,
+  "stratified_by": "source",
+  "sampled_with_replacement": false,
+  "padded_to_target": false,
+  "filters": {
+    "max_gold_answer_chars": 60,
+    "min_problem_chars": 15,
+    "internal_dedup_jaccard": 0.8,
+    "contamination_jaccard": 0.7
+  },
+  "decontamination": {
+    "training_file": "C:\\Users\\PC\\Downloads\\curated\\ganit_limo_n1000_c1-16_seed42.jsonl",
+    "training_rows": 873,
+    "removed_total": 1,
+    "removed_by_method": {
+      "numeric_fingerprint+jaccard": 1
+    },
+    "methods": [
+      "id_match",
+      "exact_text",
+      "numeric_fingerprint+jaccard"
+    ],
+    "limitation": "No upstream English source IDs are available for Ganit, so fingerprint and Jaccard matching are proxies. Paraphrases may survive."
+  },
+  "composition": {
+    "by_source": {
+      "ganit_dev": 500
+    },
+    "by_difficulty": {
+      "medium": 127,
+      "hard": 129,
+      "easy": 145,
+      "olympiad": 99
+    }
+  },
+  "verification": {
+    "IDs are unique": true,
+    "no empty problems": true,
+    "no empty answers": true,
+    "no exact duplicate problems": true,
+    "no training IDs present": true,
+    "no exact text overlap with training": true,
+    "all gold answers look final": true
+  }
+}

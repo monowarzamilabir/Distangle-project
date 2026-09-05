@@ -1,0 +1,3 @@
+model,depth,params_b,condition,easy,easy_n,medium,medium_n,hard,hard_n,olympiad,olympiad_n
+Qwen3-4B,shallow,4.0,before,0.5942,69,0.4493,69,0.403,67,0.2889,45
+Qwen3-4B,shallow,4.0,after,0.5507,69,0.3478,69,0.403,67,0.2222,45

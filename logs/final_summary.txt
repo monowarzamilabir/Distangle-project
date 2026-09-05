@@ -1,0 +1,36 @@
+
+model                  depth    cond        n     acc   cap%   fmt     bn
+--------------------------------------------------------------------------
+TigerLLM-1B            deep     before    500   0.038   0.06     2   0.87
+TigerLLM-1B            deep     after     500   0.032   0.09     0   0.83
+TituLLM-1B (v2.0)      deep     before    100   0.020   1.00    17   0.91
+TituLLM-1B (v2.0)      deep     after     100   0.000   0.47     1   0.82
+TituLLM-1B-Instruct    deep     before    100   0.000   0.19     0   0.97
+TituLLM-1B-Instruct    deep     after     100   0.010   0.41     0   0.81
+Qwen3-0.6B             shallow  before    100   0.020   0.05     0   0.85
+Qwen3-0.6B             shallow  after     100   0.020   0.34     2   0.89
+Qwen3-1.7B             shallow  before    100   0.140   0.24     1   0.89
+Qwen3-1.7B             shallow  after     100   0.160   0.18     1   0.85
+TituLLM-3B-Instruct    deep     before    100   0.010   0.09     2   0.98
+TituLLM-3B-Instruct    deep     after     100   0.010   0.25     1   0.81
+Qwen3-4B               shallow  before    100   0.450   0.06     0   0.88
+Qwen3-4B               shallow  after     100   0.380   0.07     0   0.83
+
+model                  cond         easy    medium      hard  olympiad
+--------------------------------------------------------------------------
+TigerLLM-1B            before      0.055     0.024     0.031     0.040
+TigerLLM-1B            after       0.048     0.016     0.023     0.040
+TituLLM-1B (v2.0)      before      0.000     0.042     0.035     0.000
+TituLLM-1B (v2.0)      after       0.000     0.000     0.000     0.000
+TituLLM-1B-Instruct    before      0.000     0.000     0.000     0.000
+TituLLM-1B-Instruct    after       0.033     0.000     0.000     0.000
+Qwen3-0.6B             before      0.067     0.000     0.000     0.000
+Qwen3-0.6B             after       0.067     0.000     0.000     0.000
+Qwen3-1.7B             before      0.100     0.208     0.103     0.176
+Qwen3-1.7B             after       0.200     0.208     0.103     0.118
+TituLLM-3B-Instruct    before      0.033     0.000     0.000     0.000
+TituLLM-3B-Instruct    after       0.000     0.042     0.000     0.000
+Qwen3-4B               before      0.467     0.583     0.345     0.412
+Qwen3-4B               after       0.500     0.333     0.310     0.353
+
+Wrote results_v2\eval_summary.csv and results_v2\accuracy_by_difficulty.csv

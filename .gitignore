@@ -1,0 +1,18 @@
+# Model weights and checkpoints: large, and regenerable from train_lora.py
+adapters/
+adapters_1024/
+_checkpoints/
+*.safetensors
+*.bin
+
+# Caches and scratch
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+superseded/
+terminal_output/
+*.bak
+
+# Live monitor logs; the per-run logs in logs/ are kept on purpose
+train_live.log
+eval_live.log

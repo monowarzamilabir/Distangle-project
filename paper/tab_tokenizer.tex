@@ -1,0 +1,20 @@
+\begin{table}[htbp]
+\caption{Tokens required to represent the same 873 training sequences
+under each tokenizer, measured on the full sequence train\_lora.py
+builds: shared Bengali instruction, problem, model-specific prompt
+formatting, and reasoning trace. Vocabulary sizes include added tokens.
+Notice that the two Bengali-adapted tokenizers need roughly a third as
+many tokens as Qwen3 for identical content, and that this efficiency is
+not reflected in the accuracies of Table~\ref{tab:main}.}
+\label{tab:tokenizer}
+\centering
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Tokenizer} & \textbf{Vocab} & \textbf{Median} & \textbf{p95} & \textbf{Max} \\
+\hline
+TituLLM-1B & 170,497 & 395 & 871 & 1,498 \\
+TigerLLM-1B & 262,145 & 425 & 930 & 1,431 \\
+Qwen3 & 151,669 & 1,244 & 2,395 & 3,543 \\
+\hline
+\end{tabular}
+\end{table}

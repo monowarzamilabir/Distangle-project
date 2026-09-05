@@ -1,0 +1,24 @@
+# Exact versions used for every result in the paper.
+# Recorded from the bengali-rq2 environment; see environment.json for the
+# platform, GPU and determinism notes.
+#
+#   conda create -n bengali-rq2 python=3.11
+#   conda activate bengali-rq2
+#   pip install -r requirements.txt
+#
+# torch is pinned to the CUDA 12.8 build. On a machine without an NVIDIA GPU,
+# install plain torch==2.8.0 instead; only train_lora.py and eval_math.py need
+# CUDA, and the analysis scripts run on CPU.
+
+torch==2.8.0+cu128
+transformers==4.57.6
+peft==0.20.0
+accelerate==1.14.0
+datasets==5.0.1
+tokenizers==0.22.2
+safetensors==0.8.0
+huggingface_hub==0.36.2
+
+numpy==2.4.6
+pandas==3.0.5
+matplotlib==3.10.0

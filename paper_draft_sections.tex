@@ -1,0 +1,374 @@
+% =====================================================================
+% Rewritten Introduction, Research Questions, and Literature Review
+% Scoped to RQ1 only. RQ2 (B-REASO transfer) and RQ3 (confidence-based
+% stopping) move to Future Work.
+%
+% CITATION KEYS: existing keys reused where they already appear in your
+% .bib. New keys are marked % NEW -- add these to references.bib.
+% =====================================================================
+
+\section{Introduction}
+
+Large language models can now solve competition-level mathematics, but nearly
+all of that progress has happened in English. Bengali has more than 230 million
+speakers and is still treated as low-resource. It is thinly represented in
+pretraining corpora, and reasoning-specific Bengali data barely exists. Whether
+a model can actually reason \emph{in} Bengali, rather than translate its way
+through a problem, is still an open question.
+
+Two recent efforts approach this gap from opposite directions. TigerLLM
+\parencite{raihan2025tigerllm} continually pretrained a 1B-parameter model on
+roughly 10M tokens of Grade 6--12 Bengali textbook content, plus instruction
+data distilled from frontier models. It reportedly outperformed much larger
+generalist systems, which the authors read as evidence that targeted,
+high-quality pretraining can substitute for scale. TituLLM
+\parencite{nahin2025titullm} took the opposite route, pretraining on roughly 37B
+tokens of general-domain Bengali with an extended tokenizer, and found gains
+that were capability-specific rather than uniform. Read side by side the two
+results look contradictory. They are not really a test of the same question,
+though, because in both cases model size and pretraining design move together.
+Neither study isolates which factor is doing the work.
+
+That is the first gap this paper addresses. A second follows from it. If
+reasoning ability can be elicited rather than taught, how much data does that
+take? The less-is-more literature argues the answer is surprisingly little. LIMA
+\parencite{zhou2023lima} % NEW
+proposed the Superficial Alignment Hypothesis, which holds that a model's
+knowledge is acquired almost entirely during pretraining and that alignment
+mainly teaches it which format to answer in. It demonstrated competitive
+instruction-following from 1,000 curated examples. LIMO \parencite{ye2025limo}
+extended the claim to mathematical reasoning, and s1
+\parencite{muennighoff2025s1} reproduced it with 1,000 traces plus
+inference-time budget forcing. Both LIMO and s1, however, demonstrate their
+result at 32B parameters and in English. Whether minimal-data elicitation
+survives the move to a genuinely low-resource language, and to the model sizes
+most researchers can actually train, has not been tested.
+
+We test both questions with a single controlled experiment. Seven backbones
+spanning 0.6B to 4B parameters are fine-tuned with LoRA on an identical set of
+curated Bengali mathematical reasoning traces, then evaluated on a held-out
+Bengali mathematics benchmark before and after training. The backbones are
+chosen so that pretraining depth and parameter scale vary separately.
+TigerLLM-1B and TituLLM-1B match in size but differ by roughly $3{,}700\times$
+in targeted Bengali pretraining. TituLLM-1B and TituLLM-3B share a pretraining
+recipe and differ in size. The Qwen3 family (0.6B, 1.7B, 4B) provides a scale
+ladder with essentially no Bengali-specific pretraining at all.
+
+Our contributions are:
+
+\begin{itemize}
+  \item \textbf{A controlled separation of scale from targeted pretraining
+        depth in Bengali.} Within a single model family holding pretraining
+        constant, accuracy rises from 3.6\% at 0.6B to 16.8\% at 1.7B to 44.8\%
+        at 4B, and every adjacent step on that ladder is significant (Fisher
+        exact, $p < 10^{-5}$). Targeted Bengali pretraining produces no
+        comparable gradient: four Bengali-specialised models spanning 1B to
+        3.2B parameters all sit between 0.4\% and 4.4\%.
+  \item \textbf{No comparison in this study favours the model with more
+        Bengali pretraining.} TigerLLM-1B and TituLLM-1B are matched in size
+        and differ by roughly $3{,}700\times$ in targeted Bengali pretraining,
+        and the model with less of it scores higher, 4.4\% against 2.0\%. The
+        sharpest case is TituLLM-3B-Instruct against Qwen3-1.7B: roughly twice
+        the parameters plus a Bengali continued-pretraining corpus, against
+        neither, and it loses 1.2\% to 16.8\% ($p < 10^{-4}$). This contradicts
+        the substitution claim in \parencite{raihan2025tigerllm}, tested on a
+        Bengali benchmark using that work's own released model.
+  \item \textbf{A scale boundary on minimal-data elicitation.} LIMO-style
+        fine-tuning produced no significant accuracy change on any of seven
+        backbones. That includes one model whose 44.8\% baseline shows LIMO's
+        stated precondition of latent capability is clearly satisfied.
+  \item \textbf{Evidence that elicitation changes form without changing
+        capability.} No backbone retained even half the items it had answered
+        correctly before tuning, and Qwen3-4B abandoned its own answer format
+        on 222 of 250 items while its accuracy moved by 13. Mean Bengali
+        character adherence fell in six of seven models, by up to 17 points,
+        and the per-item decline is significant in each of those six (exact
+        sign test, $p < 10^{-7}$).
+  \item \textbf{A direct test of the difficulty-calibration explanation.}
+        Retraining the same backbone on difficulty-matched easy data performed
+        significantly worse than the hard-data adapter, 12.4\% against 18.0\%
+        (exact McNemar, $p = 0.039$), which rules out the most obvious
+        alternative account of the null result.
+  \item \textbf{A measurement of the Bengali tokenizer tax} and what it means
+        for which models can be trained on consumer hardware.
+\end{itemize}
+
+\subsection{Research Questions}
+
+\textbf{RQ1:} When a model is given a small set of Bengali mathematical examples
+intended to elicit reasoning, what primarily determines its performance:
+parameter scale, or the amount of Bengali seen during pretraining? We answer
+this by comparing models that differ in only one of these factors at a time.
+
+\textbf{RQ1a:} Does minimal-data elicitation, demonstrated at 32B parameters in
+English, transfer to the 0.6B to 4B range in Bengali?
+
+\textbf{RQ1b:} If elicitation does not improve accuracy, does it change model
+behaviour at all, and in which direction?
+
+TigerLLM-1B and TituLLM-1B match in size but differ in pretraining depth.
+TituLLM-1B and TituLLM-3B share a pretraining approach but differ in size. The
+Qwen3 ladder isolates scale with Bengali exposure held near zero. This design
+lets us attribute any difference to one factor at a time, which no prior work in
+this space has done.
+
+
+% =====================================================================
+\section{Literature Review}
+
+\subsection{The Low-Resource Reasoning Baseline}
+
+Reasoning in low-resource languages is a known weak point, and Bengali is no
+exception. \textcite{alnazi2025eval} tested six LLMs on four Bengali tasks under
+zero-shot, few-shot and chain-of-thought prompting. The best result, GPT-4o with
+three-shot CoT, reached 99\% F1 on sentiment, but CoT was not reliably helpful
+and in several cases reduced accuracy through hallucination. The failure mode is
+therefore not simply insufficient capacity. Reasoning behaviour itself is
+unstable in this setting.
+
+BenNumEval \parencite{ahmed2025bennumeval} sharpens the point. Across 3.2k
+samples in six numerical reasoning categories,
+DeepSeek-R1-Distill-Llama-70B, built from top-tier English reasoning
+distillation, collapsed to 4.7\% accuracy in native Bengali. That is far below
+Gemini-2.0-flash's 79.6\%, and below several non-distilled baselines. This is
+not merely a failure to transfer; it suggests distilling English reasoning
+traces can actively damage existing multilingual ability. SOMADHAN
+\parencite{paul2025somadhan} adds an important qualifier. Using 8.8k
+expert-translated Bengali word problems, Llama-3.3-70B reached 88\%, but smaller
+models largely failed to adapt to native-language reasoning at all. The
+elicitation problem therefore interacts with model size, which is precisely what
+this paper sets out to measure.
+
+\subsection{The Backbone Debate: Scale versus Targeted Depth}
+
+This is the central disagreement in the literature, and it splits three ways
+rather than two.
+
+The \textbf{targeted-depth} position is TigerLLM \parencite{raihan2025tigerllm}.
+Pretrained on only about 10M tokens of Bengali textbook content plus 100k
+instruction pairs distilled from GPT-4o and Claude, its 1B variant reportedly
+outperformed 11B generalist models, reaching 68\% on BanglaRQA. The claim is not
+that small models can be competitive. It is that targeted depth substitutes for
+scale outright.
+
+The \textbf{scale} position pushes back. \textcite{yong2025crosslingual} found
+that test-time scaling becomes reliable only at 3B parameters or above, with a
+14B model at a sweet spot, and noted that Bengali's tokenizer makes reasoning
+roughly $3.5\times$ more expensive than English. MathMist
+\parencite{sobhani2026mathmist}, a 30k-pair benchmark across 13 languages,
+reports that scaling Qwen from 0.6B to 14B shrank the Bengali--English accuracy
+gap from 7\% to 1\%, with smaller models showing what the authors call
+linguistic brittleness during CoT.
+
+Classical scaling work supplies the mechanism. \textcite{kaplan2020scaling} % NEW
+showed that language modelling loss depends strongly on parameter count and only
+weakly on architectural shape, to the point where aspect ratio can vary by a
+factor of 40 with little effect. \textcite{wei2022emergent} % NEW
+is more directly relevant to our range. They report that three-digit arithmetic
+emerges only at roughly 13B parameters, and that chain-of-thought prompting
+surpasses standard prompting on GSM8K only at around 100B parameters. If
+arithmetic competence and CoT benefit both emerge above 13B, then the 0.6B to 4B
+range studied here sits entirely below the threshold at which the relevant
+abilities have been shown to appear.
+
+A third position complicates both. TituLLM \parencite{nahin2025titullm}
+pretrained on roughly 37B tokens of general-domain Bengali with an extended
+tokenizer, and found that this helped commonsense-style tasks but not
+broad-knowledge tasks such as MMLU. The authors partly attribute this to
+single-epoch training and the absence of instruction tuning. On this account
+pretraining depth helps some capabilities and not others.
+
+The problem common to all three is that none of them isolates scale from
+pretraining depth. TigerLLM's depth claim exists only at 1B and 9B. TituLLM's
+scale claim exists only inside its own general-corpus recipe. The two variables
+are always entangled. Closing that gap, by fixing scale at 1B while varying
+depth and fixing the recipe while varying scale, is the design of this paper.
+
+\subsection{The Less-Is-More Elicitation Paradigm}
+
+A second strand argues that surfacing reasoning in an already-capable model
+takes remarkably little data. This is what makes a small Bengali training set a
+reasonable intervention rather than an underpowered shortcut.
+
+LIMA \parencite{zhou2023lima} % NEW
+states the underlying claim most directly, as the Superficial Alignment
+Hypothesis: a model's knowledge is acquired almost entirely during pretraining,
+and alignment principally teaches it which format and style to use when
+responding. LIMO \parencite{ye2025limo} carries the argument into mathematics,
+reporting that 800 curated reasoning traces elicited more sophisticated
+reasoning than training on the 100k-sample NuminaMath dataset, with gains
+saturating around 1.6k samples or 32B parameters. s1
+\parencite{muennighoff2025s1} arrives somewhere similar by a different route:
+1k traces plus budget forcing let s1-32B beat o1-preview on AIME24 by 27\%. LESS
+\parencite{xia2024less} offers a mechanism, showing that selecting 5\% of a
+270k-point pool by projected low-rank gradient relevance beat training on the
+full set. Functional relevance beats raw volume.
+
+Two features of this literature matter here. First, every demonstration is at
+32B parameters or above. Second, all of them are in high-resource languages.
+LIMO's own stated precondition, that the base model must already hold dense and
+relevant knowledge from pretraining, is an empirical claim about the backbone.
+Whether it holds at 0.6B to 4B in Bengali is exactly what we test.
+
+\subsection{The Elicitation Tax: Native Reasoning versus English Pivot}
+
+There is a measurable cost to reasoning \emph{in} Bengali specifically.
+\textcite{qi2025xreasoning}, using the 370-question, 11-language XReasoning
+benchmark, found that forcing native Bengali reasoning instead of pivoting
+through English dropped accuracy on hard tasks such as AIME from 26\% to 17\%.
+Their proposed fix was tested on at most 817 samples, so it is a partial answer
+at best. \textcite{yong2025crosslingual} adds that Bengali's tokenizer makes
+reasoning roughly $3.5\times$ more expensive, and that even where in-domain
+scaling works, generalisation to out-of-domain cultural knowledge stays weak.
+Taken together with the BenNumEval collapse, these results suggest that
+interventions meant to improve Bengali reasoning may trade language adherence
+against accuracy. We observe that tension directly in our own results.
+
+\subsection{Adaptation Method and Its Limits}
+
+Because this study fine-tunes with LoRA rather than full parameter updates, the
+method itself is a variable that has to be accounted for.
+
+LoRA \parencite{hu2021lora} % NEW
+freezes pretrained weights and injects trainable low-rank matrices. It was
+introduced with results showing parity or better against full fine-tuning on
+GLUE-style tasks, for instance 91.3 versus 91.1 average GLUE for DeBERTa-XXL
+using 4.7M of 1.5B parameters. Those tasks are largely classification and
+generation within a model's existing competence, though.
+\textcite{biderman2024lora} % NEW
+tests the harder case directly. On mathematics, measured as GSM8K strict match
+after continued pretraining, full fine-tuning reached 0.293 while LoRA at rank
+256 reached 0.202 and rank 16 only 0.158. On code instruction tuning, full
+fine-tuning reached 0.470 against 0.358 for rank 16. Their conclusion is that
+``in the standard low-rank settings, LoRA substantially underperforms full
+finetuning,'' which they attribute to full fine-tuning finding perturbations of
+rank 10 to 100 times greater than typical LoRA configurations. They also report
+the converse: LoRA forgets less, keeping the tuned model's behaviour closer to
+the base model.
+
+This has two consequences here. It predicts that a rank-16 configuration will
+under-acquire new mathematical capability, which bears directly on how our null
+result should be read. It also predicts that base behaviour will be
+comparatively preserved, which is consistent with what we observe. We note that
+Biderman et al. train only at 7B, outside the range studied here.
+
+Domain-adaptive pretraining supplies the other half of the frame. Both TigerLLM
+and TituLLM are instances of continued pretraining on a target domain, differing
+by more than three orders of magnitude in token budget, and neither reports an
+ablation isolating that budget from the base model it starts from.
+
+\subsection{The Cost of Bengali Tokenization}
+
+Tokenizer efficiency is usually treated as an implementation detail. For Bengali
+it is a first-order constraint. \textcite{ahia2023alllanguages} % NEW
+show that languages with their own scripts require up to $5\times$ more tokens
+than English to convey identical content, that API costs rise correspondingly,
+and that high fragmentation can stop even a single in-context example from
+fitting in a fixed context window. \textcite{petrov2023language} % NEW
+quantify this per model, reporting Bengali tokenization premiums that range from
+9.65 for GPT-2 and 5.84 for ChatGPT down to 1.01 for the Indic-focused MuRIL.
+That is close to a tenfold spread in how much Bengali text fits in the same
+budget.
+
+The backbones studied here span that spread, though by accident rather than
+design. Llama~3 \parencite{llama3herd} % NEW
+adopts a 128k-token vocabulary explicitly to improve non-English compression,
+and TituLLM extends it further for Bengali. Gemma~3 \parencite{gemma3} % NEW
+ships a 262k-entry SentencePiece vocabulary described as ``more balanced for
+non-English languages,'' which TigerLLM inherits without doing any tokenizer
+work of its own. Qwen3 \parencite{qwen3} % NEW
+uses a 151,669-entry BBPE vocabulary covering 119 languages. These choices were
+made for reasons unrelated to Bengali, yet they determine how much Bengali
+reasoning fits inside a fixed training budget, and therefore which models can be
+trained at all on consumer hardware.
+
+\subsection{Gap Statement}
+
+Three gaps remain open for RQ1.
+
+First, no Bengali-language study separates parameter scale from pretraining
+depth as independent factors. The works in Section~2.2 always vary size and
+corpus design together, so existing work cannot tell us which one is
+responsible.
+
+Second, minimal-data elicitation has been demonstrated only at 32B parameters or
+above, and only in high-resource languages, while the abilities it aims to
+surface, arithmetic competence and chain-of-thought benefit, have themselves
+been reported to emerge only above roughly 13B \parencite{wei2022emergent}. % NEW
+Whether the paradigm holds below that threshold, in a language carrying a
+$3.5\times$ tokenization penalty, is untested.
+
+Third, the interaction between adaptation method and this question is
+unexamined. LoRA is the only practically available option at consumer scale, yet
+it is documented to under-acquire new capability relative to full fine-tuning
+\parencite{biderman2024lora}, % NEW
+and no prior work reports what minimal-data elicitation does under that
+constraint in a low-resource language.
+
+
+% =====================================================================
+% NEW BIBTEX ENTRIES -- verify every field against the actual papers
+% =====================================================================
+%
+% @article{kaplan2020scaling,
+%   title={Scaling Laws for Neural Language Models},
+%   author={Kaplan, Jared and McCandlish, Sam and Henighan, Tom and Brown, Tom B.
+%           and Chess, Benjamin and Child, Rewon and Gray, Scott and Radford, Alec
+%           and Wu, Jeffrey and Amodei, Dario},
+%   journal={arXiv preprint arXiv:2001.08361}, year={2020}}
+%
+% @article{wei2022emergent,
+%   title={Emergent Abilities of Large Language Models},
+%   author={Wei, Jason and Tay, Yi and Bommasani, Rishi and Raffel, Colin and
+%           Zoph, Barret and Borgeaud, Sebastian and Yogatama, Dani and Bosma, Maarten
+%           and Zhou, Denny and Metzler, Donald and Chi, Ed H. and Hashimoto, Tatsunori
+%           and Vinyals, Oriol and Liang, Percy and Dean, Jeff and Fedus, William},
+%   journal={Transactions on Machine Learning Research}, year={2022}}
+%
+% @article{hu2021lora,
+%   title={LoRA: Low-Rank Adaptation of Large Language Models},
+%   author={Hu, Edward J and Shen, Yelong and Wallis, Phillip and Allen-Zhu, Zeyuan
+%           and Li, Yuanzhi and Wang, Shean and Wang, Lu and Chen, Weizhu},
+%   journal={arXiv preprint arXiv:2106.09685}, year={2021}}
+%
+% @article{biderman2024lora,
+%   title={LoRA Learns Less and Forgets Less},
+%   author={Biderman, Dan and Portes, Jacob and Ortiz, Jose Javier Gonzalez and
+%           Paul, Mansheej and Greengard, Philip and Jennings, Connor and King, Daniel
+%           and Havens, Sam and Chiley, Vitaliy and Frankle, Jonathan and
+%           Blakeney, Cody and Cunningham, John P.},
+%   journal={Transactions on Machine Learning Research}, year={2024}}
+%
+% @article{ahia2023alllanguages,
+%   title={Do All Languages Cost the Same? Tokenization in the Era of Commercial Language Models},
+%   author={Ahia, Orevaoghene and Kumar, Sachin and Gonen, Hila and Kasai, Jungo and
+%           Mortensen, David R. and Smith, Noah A. and Tsvetkov, Yulia},
+%   journal={arXiv preprint arXiv:2305.13707}, year={2023}}
+%
+% @article{petrov2023language,
+%   title={Language Model Tokenizers Introduce Unfairness Between Languages},
+%   author={Petrov, Aleksandar and La Malfa, Emanuele and Torr, Philip H.S. and Bibi, Adel},
+%   journal={arXiv preprint arXiv:2305.15425}, year={2023}}   % VERIFY arXiv id
+%
+% @inproceedings{zhou2023lima,
+%   title={LIMA: Less Is More for Alignment},
+%   author={Zhou, Chunting and Liu, Pengfei and Xu, Puxin and Iyer, Srini and Sun, Jiao
+%           and Mao, Yuning and Ma, Xuezhe and Efrat, Avia and Yu, Ping and Yu, Lili
+%           and Zhang, Susan and Ghosh, Gargi and Lewis, Mike and Zettlemoyer, Luke
+%           and Levy, Omer},
+%   booktitle={Advances in Neural Information Processing Systems}, year={2023}}
+%
+% @article{llama3herd,
+%   title={The Llama 3 Herd of Models},
+%   author={{Llama Team, AI@Meta}}, year={2024},
+%   journal={arXiv preprint arXiv:2407.21783}}   % VERIFY
+%
+% @article{gemma3,
+%   title={Gemma 3 Technical Report},
+%   author={{Gemma Team, Google DeepMind}},
+%   journal={arXiv preprint arXiv:2503.19786}, year={2025}}
+%
+% @article{qwen3,
+%   title={Qwen3 Technical Report},
+%   author={{Qwen Team}}, year={2025},
+%   journal={arXiv preprint arXiv:2505.09388}}   % VERIFY

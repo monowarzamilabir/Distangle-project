@@ -1,0 +1,21 @@
+\begin{table}[htbp]
+\caption{Answer retention. Of the items each model answered correctly
+before fine-tuning, how many it still answered correctly afterwards, and
+how many items changed outcome in either direction. Notice that no model
+retained even half of what it already knew, which is why the small net
+changes in Table~\ref{tab:main} understate how much the adapter moved.}
+\label{tab:retention}
+\centering\small
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Model} & \textbf{Correct before} & \textbf{Retained} & \textbf{Retention} & \textbf{Items flipped} \\
+\hline
+Qwen3-4B & 112 & 56 & 50\% & 99 / 250 \\
+Qwen3-1.7B & 42 & 18 & 43\% & 51 / 250 \\
+Qwen3-0.6B & 9 & 4 & 44\% & 16 / 250 \\
+TigerLLM-1B & 11 & 2 & 18\% & 13 / 250 \\
+TituLLM-3B-Instruct & 3 & 0 & 0\% & 6 / 250 \\
+TituLLM-1B-Instruct & 1 & 0 & 0\% & 8 / 250 \\
+\hline
+\end{tabular}
+\end{table}

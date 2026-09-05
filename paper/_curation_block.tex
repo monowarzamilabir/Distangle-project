@@ -1,0 +1,62 @@
+Training data was drawn from the SFT split of the Ganit dataset
+\parencite{ganitllm}, a Bengali mathematical reasoning corpus of 16,868
+problems, each carrying a full Bengali reasoning trace and a difficulty score.
+The difficulty score is the number of times Qwen3-32B solved the problem across
+32 sampled attempts, so it records difficulty relative to a 32B model. The pool
+is assembled from four upstream sources: numina-math-cot-bn (13,160 problems),
+SOMADHAN (3,487), mCoT-MATH-bn (193) and s1k-32-Bangla (28). Its own difficulty
+tags skew easy (10,065 easy, 6,411 olympiad, 258 hard, 134 medium), but the
+solve-rate column tells a harsher story: 5,645 problems, a third of the corpus,
+were never solved by Qwen3-32B in any of 32 attempts, and 91.7\% of that
+unsolvable band comes from numina-math-cot-bn alone. We treat the zero band as
+unreliable rather than merely hard, and exclude it.
+
+Figure~\ref{fig:curation} shows the pipeline. Decontamination ran first, before
+any difficulty filtering, against 4,080 problems pooled from three public
+Bengali mathematics benchmarks: Bn-MGSM (250 problems), Bn-MSVAMP (1,000) and
+BenNumEval (2,830 across five task types). A training problem was removed if it
+matched a benchmark problem on either of two signals. The first is a numeric
+fingerprint, the hash of the sorted set of numbers appearing in the normalised
+problem text. Numbers survive re-translation even when every surrounding word
+changes, so this catches exactly the case that n-gram or MinHash deduplication
+misses. The second is token Jaccard overlap at a threshold of 0.7, which
+catches near-identical wording. Normalisation maps Bengali numerals to Western
+digits, lowercases, strips punctuation and collapses whitespace, so the two
+numeral conventions present in the corpus compare on equal footing. Together
+these removed 3,315 problems and left 13,553.
+
+Following LIMO's selection criterion, we then retained problems in the window
+$1 \leq \text{correct\_counts} \leq 16$, which reduced 13,553 to 873. A final
+near-duplicate pass within the surviving set removed nothing, which is itself
+mild evidence that the pool is not padded with reworded repeats. The resulting
+set is heavily weighted towards hard problems: 74.6\% carry an olympiad
+difficulty tag and 25.3\% are tagged hard, with a mean pass rate of 3.3 out of
+32.
+
+A second training set was constructed later to test whether that difficulty
+distribution explains our results. Holding every other choice constant, we
+selected 1,000 traces from the band $\text{correct\_counts} \geq 28$, giving a
+mean pass rate of 31.8 out of 32 and a difficulty composition of 100\% easy.
+Section~\ref{sec:difficulty} reports that experiment. This set was
+decontaminated directly against the held-out evaluation items rather than
+against the public benchmarks, using the same numeric fingerprint idea. That
+filter is deliberately aggressive and removed 1,782 candidates.
+
+The evaluation set was independently checked against the 873 training traces by
+identifier match, exact normalised text match, and numeric fingerprint combined
+with Jaccard overlap. One item matched and was dropped. Neither training set
+shares an identifier or problem text with the evaluation set, and the two
+training sets are disjoint from each other because they are drawn from
+non-overlapping difficulty bands. One limitation is worth stating plainly:
+Ganit carries no upstream English source identifiers, so fingerprint and
+Jaccard matching are proxies, and a sufficiently free paraphrase could survive
+both filters.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{figs/fig_curation.pdf}
+\caption{Curation of the 873-trace training set. Decontamination against three
+public Bengali mathematics benchmarks precedes difficulty filtering, so the
+LIMO window is applied to an already-clean pool.}
+\label{fig:curation}
+\end{figure}

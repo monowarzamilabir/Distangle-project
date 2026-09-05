@@ -1,0 +1,34 @@
+GPU NVIDIA GeForce RTX 5060 Ti | transformers 4.57.6
+Eval items: 20 | by difficulty: {'medium': 5, 'hard': 6, 'easy': 6, 'olympiad': 3}
+Overlap check: 873 train rows | id overlap 0 | text overlap 0
+PASS  no exact overlap (will not catch paraphrases)
+
+==================================================================
+TigerLLM-1B  [before]   20 to do, 0 done
+==================================================================
+C:\anaconda\envs\bengali-rq2\Lib\site-packages\torch\nn\modules\module.py:1082: UserWarning: expandable_segments not supported on this platform (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\pytorch\c10/cuda/CUDAAllocatorConfig.h:35.)
+  return self._apply(lambda t: t.cuda(device))
+  prompt_style=raw  batch=8  stop=['<eos>', '<end_of_turn>']
+The following generation flags are not valid and may be ignored: ['top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+  20/20  5.3s/item  eta 0 min
+  Wrote results_v2\preds_tigerllm-1b_before.jsonl
+
+==================================================================
+TigerLLM-1B  [after]   20 to do, 0 done
+==================================================================
+  LoRA adapter merged.
+  prompt_style=raw  batch=8  stop=['<eos>', '<end_of_turn>']
+  20/20  5.3s/item  eta 0 min
+  Wrote results_v2\preds_tigerllm-1b_after.jsonl
+
+model                  depth    cond        n     acc   cap%   fmt     bn
+--------------------------------------------------------------------------
+TigerLLM-1B            deep     before     20   0.000   0.10     0   0.92
+TigerLLM-1B            deep     after      20   0.000   0.05     0   0.87
+
+model                  cond         easy    medium      hard  olympiad
+--------------------------------------------------------------------------
+TigerLLM-1B            before      0.000     0.000     0.000     0.000
+TigerLLM-1B            after       0.000     0.000     0.000     0.000
+
+Wrote results_v2\eval_summary.csv and results_v2\accuracy_by_difficulty.csv

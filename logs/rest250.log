@@ -1,0 +1,140 @@
+[16:44:43] === qwen3-1.7b-easy (after only; before is the shared base) ===
+GPU NVIDIA GeForce RTX 5060 Ti | transformers 4.57.6
+Eval items: 500 | by difficulty: {'medium': 127, 'hard': 129, 'easy': 145, 'olympiad': 99}
+Overlap check: 873 train rows | id overlap 0 | text overlap 0
+PASS  no exact overlap (will not catch paraphrases)
+
+==================================================================
+Qwen3-1.7B-easy  [after]   0 to do, 250 done   (subsample n=250)
+==================================================================
+Nothing to do.
+
+model                  depth    cond        n     acc   cap%   fmt     bn
+--------------------------------------------------------------------------
+Qwen3-1.7B-easy        shallow  after     250   0.124   0.28     2   0.84
+
+model                  cond         easy    medium      hard  olympiad
+--------------------------------------------------------------------------
+Qwen3-1.7B-easy        after       0.174     0.130     0.119     0.044
+
+Wrote results_v2\eval_summary.csv and results_v2\accuracy_by_difficulty.csv
+[16:44:48] qwen3-1.7b-easy done
+[16:44:48] === qwen3-0.6b ===
+GPU NVIDIA GeForce RTX 5060 Ti | transformers 4.57.6
+Eval items: 500 | by difficulty: {'medium': 127, 'hard': 129, 'easy': 145, 'olympiad': 99}
+Overlap check: 873 train rows | id overlap 0 | text overlap 0
+PASS  no exact overlap (will not catch paraphrases)
+
+==================================================================
+Qwen3-0.6B  [before]   0 to do, 250 done   (subsample n=250)
+==================================================================
+Nothing to do.
+
+==================================================================
+Qwen3-0.6B  [after]   0 to do, 250 done   (subsample n=250)
+==================================================================
+Nothing to do.
+
+model                  depth    cond        n     acc   cap%   fmt     bn
+--------------------------------------------------------------------------
+Qwen3-0.6B             shallow  before    250   0.036   0.05     0   0.86
+Qwen3-0.6B             shallow  after     250   0.060   0.37     4   0.88
+
+model                  cond         easy    medium      hard  olympiad
+--------------------------------------------------------------------------
+Qwen3-0.6B             before      0.029     0.043     0.045     0.022
+Qwen3-0.6B             after       0.087     0.043     0.090     0.000
+
+Wrote results_v2\eval_summary.csv and results_v2\accuracy_by_difficulty.csv
+[16:44:52] qwen3-0.6b done
+[16:44:52] === titulm-1b-it ===
+GPU NVIDIA GeForce RTX 5060 Ti | transformers 4.57.6
+Eval items: 500 | by difficulty: {'medium': 127, 'hard': 129, 'easy': 145, 'olympiad': 99}
+Overlap check: 873 train rows | id overlap 0 | text overlap 0
+PASS  no exact overlap (will not catch paraphrases)
+
+==================================================================
+TituLLM-1B-Instruct  [before]   0 to do, 250 done   (subsample n=250)
+==================================================================
+Nothing to do.
+
+==================================================================
+TituLLM-1B-Instruct  [after]   0 to do, 250 done   (subsample n=250)
+==================================================================
+Nothing to do.
+
+model                  depth    cond        n     acc   cap%   fmt     bn
+--------------------------------------------------------------------------
+TituLLM-1B-Instruct    deep     before    250   0.004   0.20     0   0.98
+TituLLM-1B-Instruct    deep     after     250   0.028   0.45     0   0.81
+
+model                  cond         easy    medium      hard  olympiad
+--------------------------------------------------------------------------
+TituLLM-1B-Instruct    before      0.015     0.000     0.000     0.000
+TituLLM-1B-Instruct    after       0.058     0.029     0.015     0.000
+
+Wrote results_v2\eval_summary.csv and results_v2\accuracy_by_difficulty.csv
+[16:44:56] titulm-1b-it done
+[16:44:56] === titulm-3b-it ===
+GPU NVIDIA GeForce RTX 5060 Ti | transformers 4.57.6
+Eval items: 500 | by difficulty: {'medium': 127, 'hard': 129, 'easy': 145, 'olympiad': 99}
+Overlap check: 873 train rows | id overlap 0 | text overlap 0
+PASS  no exact overlap (will not catch paraphrases)
+
+==================================================================
+TituLLM-3B-Instruct  [before]   0 to do, 250 done   (subsample n=250)
+==================================================================
+Nothing to do.
+
+==================================================================
+TituLLM-3B-Instruct  [after]   92 to do, 158 done   (subsample n=250)
+==================================================================
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 123.84it/s]
+  LoRA adapter merged.
+  prompt_style=chat  batch=1  max_new=1024  stop=['<|end_of_text|>', '<|eot_id|>']
+  5/92  4424.5s/item  eta 6415 min
+  10/92  2248.0s/item  eta 3072 min
+  15/92  1534.1s/item  eta 1969 min
+  20/92  1153.0s/item  eta 1384 min
+  25/92  926.3s/item  eta 1034 min
+  30/92  793.6s/item  eta 820 min
+  35/92  690.8s/item  eta 656 min
+  40/92  612.7s/item  eta 531 min
+  45/92  557.6s/item  eta 437 min
+  50/92  506.3s/item  eta 354 min
+  55/92  469.6s/item  eta 290 min
+  60/92  436.9s/item  eta 233 min
+  65/92  407.0s/item  eta 183 min
+  70/92  382.9s/item  eta 140 min
+  75/92  361.8s/item  eta 103 min
+  80/92  346.0s/item  eta 69 min
+  85/92  328.7s/item  eta 38 min
+  90/92  312.9s/item  eta 10 min
+  92/92  306.5s/item  eta 0 min
+  freed; VRAM now 0.01 GB
+  Wrote results_v2\preds_titulm-3b-it_after.jsonl
+
+model                  depth    cond        n     acc   cap%   fmt     bn
+--------------------------------------------------------------------------
+TituLLM-3B-Instruct    deep     before    250   0.012   0.08     4   0.98
+TituLLM-3B-Instruct    deep     after     250   0.012   0.29     2   0.81
+
+model                  cond         easy    medium      hard  olympiad
+--------------------------------------------------------------------------
+TituLLM-3B-Instruct    before      0.015     0.015     0.015     0.000
+TituLLM-3B-Instruct    after       0.015     0.015     0.015     0.000
+
+Wrote results_v2\eval_summary.csv and results_v2\accuracy_by_difficulty.csv
+[00:35:01] titulm-3b-it done
+[00:35:01] === qwen3-4b ===
+GPU NVIDIA GeForce RTX 5060 Ti | transformers 4.57.6
+Eval items: 500 | by difficulty: {'medium': 127, 'hard': 129, 'easy': 145, 'olympiad': 99}
+Overlap check: 873 train rows | id overlap 0 | text overlap 0
+PASS  no exact overlap (will not catch paraphrases)
+
+==================================================================
+Qwen3-4B  [before]   150 to do, 100 done   (subsample n=250)
+==================================================================
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00, 30.25it/s]
+  prompt_style=chat  batch=2  max_new=2048  stop=['<|endoftext|>', '<|im_end|>']
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.

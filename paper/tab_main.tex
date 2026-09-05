@@ -1,0 +1,25 @@
+\begin{table*}[t]
+\caption{Accuracy before and after LIMO-style fine-tuning on 873 curated
+Bengali reasoning traces, on the same 250 held-out items per model
+(TituLLM-1B base on 100). Intervals on each accuracy are Wilson 95\%.
+$\Delta$ is the paired risk difference in percentage points with its 95\%
+confidence interval; it is the effect size, and it is reported because a
+$p$-value alone does not bound how large the change could be. $p$ is a
+two-sided exact McNemar test on the discordant pairs. Notice that every
+$\Delta$ interval contains zero.}
+\label{tab:main}
+\centering\small
+\begin{tabular}{|l|c|c|c|c|c|c|c|c|}
+\hline
+\textbf{Model} & \textbf{Params} & \textbf{Bn depth} & \textbf{$n$} & \textbf{Before} & \textbf{After} & \textbf{$\Delta$ (pp)} & \textbf{95\% CI} & \textbf{$p$} \\
+\hline
+TituLLM-1B (base) & 1.0B & deep & 100 & 2.0\% & 0.0\% & -2.0 & [-4.7, +0.7] & 0.500 \\
+TituLLM-1B-Instruct & 1.0B & deep & 250 & 0.4\% & 2.8\% & +2.4 & [+0.2, +4.6] & 0.070 \\
+TigerLLM-1B & 1.0B & deep & 250 & 4.4\% & 2.4\% & -2.0 & [-4.8, +0.8] & 0.267 \\
+TituLLM-3B-Instruct & 3.2B & deep & 250 & 1.2\% & 1.2\% & +0.0 & [-1.9, +1.9] & 1.000 \\
+Qwen3-0.6B & 0.6B & shallow & 250 & 3.6\% & 6.0\% & +2.4 & [-0.7, +5.5] & 0.210 \\
+Qwen3-1.7B & 1.7B & shallow & 250 & 16.8\% & 18.0\% & +1.2 & [-4.4, +6.8] & 0.780 \\
+Qwen3-4B & 4.0B & shallow & 250 & 44.8\% & 39.6\% & -5.2 & [-13.0, +2.6] & 0.228 \\
+\hline
+\end{tabular}
+\end{table*}

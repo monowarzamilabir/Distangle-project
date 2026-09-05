@@ -1,0 +1,61 @@
+`torch_dtype` is deprecated! Use `dtype` instead!
+filtered to difficulty=easy: 145 available
+MODEL          : Qwen3-1.7B after  (Qwen/Qwen3-1.7B)
+chat_template  : True
+declared eos   : '<|im_end|>' (id=151645)
+stop tokens    : ['<|endoftext|>', '<|im_end|>'] -> [151643, 151645]
+
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 108.08it/s]
+C:\anaconda\envs\bengali-rq2\Lib\site-packages\torch\nn\modules\module.py:1082: UserWarning: expandable_segments not supported on this platform (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\pytorch\c10/cuda/CUDAAllocatorConfig.h:35.)
+  return self._apply(lambda t: t.cuda(device))
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+adapter merged : adapters/qwen3-1.7b
+
+
+MODEL: Qwen3-1.7B after  thinking=False
+style       cap%     acc    tokens      bn
+------------------------------------------
+raw         1.00    0.00      1024    0.71
+chat        0.33    0.17       727    0.77
+
+
+--- raw sample (first 500 chars) ---
+ 
+
+<answer>
+১. **প্রথমে হরণ করি**: 
+   - নবম শ্রেণিতে ১৮০ জন ছাত্র আছে।
+   - তাদের মধ্যে ১/৪ ভাগ তাদের পরীক্ষায় খারাপ ফলাফল করেছে:
+     \[
+     \frac{1}{4} \times 180 = 45 \text{ জন}
+     \]
+   - অতএব, বাকি ছাত্রের সংখ্যা হল:
+     \[
+     180 - 45 = 135 \text{ জন}
+     \]
+
+2. **দ্বিতীয়ে হরণ করি**: 
+   - বাকিদের মধ্যে ১/৩ ভাগ পরীক্ষা দিতে আসেনি:
+     \[
+     \frac{1}{3} \times 135 = 45 \text{ জন}
+     \]
+   - অতএব, পরীক্ষা দিতে আসা ছাত্রের সংখ্যা হল:
+     \[
+     135 - 45 = 90 \text{ জন}
+     \
+
+--- chat sample (first 500 chars) ---
+<think>
+প্রথমে, আমরা নবম শ্রেণিতে কতজন ছাত্র পরীক্ষা দিয়েছে তা বের করি:
+
+180 (পূর্বপূর্ব) * 3/4 = 135 জন ছাত্র পরীক্ষা দিয়েছে।
+
+এখন, আমরা বাকি ছাত্রদের সংখ্যা বের করি:
+
+180 - 135 = 45 জন ছাত্র বাকি থাকে।
+
+আমরা জানি যে 70 জন ছাত্র তাদের পরীক্ষায় পাশ করেছে, অর্থাৎ তাদের পরীক্ষা দিয়েছে না। তাই, আমরা বাকি ছাত্রদের মধ্যে কতজন ছাত্র পরীক্ষা দিয়েছে তা বের করি:
+
+45 - 70 = -25 জন ছাত্র।
+
+এটি হল অসম্ভব, তাই আমরা এই বিষয়টি বিবেচনা করতে হবে। যদি আমরা বুঝতে পারি যে প্রশ্নটি বৈধভাবে প্রকাশিত হয়েছে, তাহ

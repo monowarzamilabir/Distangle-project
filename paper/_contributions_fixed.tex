@@ -1,0 +1,38 @@
+Our contributions are:
+
+\begin{itemize}
+  \item \textbf{A controlled separation of scale from targeted pretraining
+        depth in Bengali.} Within a single model family holding pretraining
+        constant, accuracy rises from 3.6\% at 0.6B to 16.8\% at 1.7B to 44.8\%
+        at 4B, and every adjacent step on that ladder is significant (Fisher
+        exact, $p < 10^{-5}$). Targeted Bengali pretraining produces no
+        comparable gradient: four Bengali-specialised models spanning 1B to
+        3.2B parameters all sit between 0.4\% and 4.4\%.
+  \item \textbf{No comparison in this study favours the model with more
+        Bengali pretraining.} TigerLLM-1B and TituLLM-1B are matched in size
+        and differ by roughly $3{,}700\times$ in targeted Bengali pretraining,
+        and the model with less of it scores higher, 4.4\% against 2.0\%. The
+        sharpest case is TituLLM-3B-Instruct against Qwen3-1.7B: roughly twice
+        the parameters plus a Bengali continued-pretraining corpus, against
+        neither, and it loses 1.2\% to 16.8\% ($p < 10^{-4}$). This contradicts
+        the substitution claim in \parencite{raihan2025tigerllm}, tested on a
+        Bengali benchmark using that work's own released model.
+  \item \textbf{A scale boundary on minimal-data elicitation.} LIMO-style
+        fine-tuning produced no significant accuracy change on any of seven
+        backbones. That includes one model whose 44.8\% baseline shows LIMO's
+        stated precondition of latent capability is clearly satisfied.
+  \item \textbf{Evidence that elicitation changes form without changing
+        capability.} No backbone retained even half the items it had answered
+        correctly before tuning, and Qwen3-4B abandoned its own answer format
+        on 222 of 250 items while its accuracy moved by 13. Mean Bengali
+        character adherence fell in six of seven models, by up to 17 points,
+        and the per-item decline is significant in each of those six (exact
+        sign test, $p < 10^{-7}$).
+  \item \textbf{A direct test of the difficulty-calibration explanation.}
+        Retraining the same backbone on difficulty-matched easy data performed
+        significantly worse than the hard-data adapter, 12.4\% against 18.0\%
+        (exact McNemar, $p = 0.039$), which rules out the most obvious
+        alternative account of the null result.
+  \item \textbf{A measurement of the Bengali tokenizer tax} and what it means
+        for which models can be trained on consumer hardware.
+\end{itemize}

@@ -1,0 +1,40 @@
+`torch_dtype` is deprecated! Use `dtype` instead!
+The following generation flags are not valid and may be ignored: ['top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+filtered to difficulty=easy: 145 available
+MODEL          : TigerLLM-1B-it  (md-nishat-008/TigerLLM-1B-it)
+chat_template  : True
+declared eos   : '<end_of_turn>' (id=106)
+stop tokens    : ['<eos>', '<end_of_turn>'] -> [1, 106]
+
+
+MODEL: TigerLLM-1B-it  thinking=False
+style       cap%     acc    tokens      bn
+------------------------------------------
+raw         0.00    0.00       258    0.89
+chat        0.08    0.00       320    0.84
+
+
+--- raw sample (first 500 chars) ---
+
+১. প্রথমে আমরা মোট শিক্ষার্থীর সংখ্যা নির্ণয় করি যা কঠিন বিচ্ছেদের কারণে পরীক্ষায় খারাপ হয়েছে। যেহেতু প্রতিটি ছাত্রের 1/4 ভাগ খারাপ হয়েছে, তাই আমরা পাই:
+\[\frac{1}{4} \times 180 = 45\]
+অতএব, 45 জন ছাত্র খারাপ হয়েছে।
+
+২. এরপর, আমরা জানি যে বাকি 35 জন ছাত্র (যেখানে 1/3 ভাগ পরীক্ষা দেয়নি) কঠোর পরীক্ষার জন্য প্রস্তুত ছিল। অতএব, এই 35 জনের মধ্যে যারা পরীক্ষা দিয়েছে তা হল:
+\[\frac{1}{3} \times 35 = 11.67\]
+যেহেতু এটি একটি ভগ্নাংশ হতে পারে না, তাই আমাদের মনে রাখতে হবে যে 11 জন ছাত্র পরীক্ষা দিয
+
+--- chat sample (first 500 chars) ---
+সমাধান: ধরি, D এর চেয়ে কম নম্বর পেয়েছে এমন ছাত্রদের সংখ্যা \( x \)। তাহলে, D এর চেয়ে কম নম্বর পেয়েছে এমন মোট ছাত্রের সংখ্যা \( 1 - \frac{1}{4} = \frac{3}{4} \) । অর্থাৎ, \( \frac{3}{4}x \) টি ছাত্র D এর চেয়ে কম নম্বর পেয়েছে।
+
+প্রশ্ন অনুসারে, ৭০ জন ছাত্র তাদের পরীক্ষায় পাশ করেছে। তাই, আমরা পাই:
+
+\[ \frac{3}{4}x + \frac{1}{3}x = 70 \]
+
+\( x \) এর জন্য সমাধান করি:
+
+\[ \left(\frac{9}{12} + \frac{4}{12}\right)x = 70 \]
+
+\[ \frac{13}{12}x = 70 \]
+
+এখন, \( x \) নির্ণয় করতে উভয়পাশে \( \frac{12}

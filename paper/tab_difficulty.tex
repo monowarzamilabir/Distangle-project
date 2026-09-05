@@ -1,0 +1,24 @@
+\begin{table*}[t]
+\caption{Accuracy by difficulty tier, before and after fine-tuning, for
+every backbone on the same held-out items. Tier counts are 69 easy, 69
+medium, 67 hard and 45 olympiad for the models evaluated on 250 items,
+and 30/24/29/17 for TituLLM-1B base on 100. Notice that the Qwen3
+advantage holds in every tier rather than coming from one band, and that
+no tier shows a consistent post-tuning gain.}
+\label{tab:difficulty}
+\centering\small
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Model} & \textbf{Easy} & \textbf{Medium} & \textbf{Hard} & \textbf{Olympiad} \\
+\hline
+TituLLM-1B (base) & 0.0 $\rightarrow$ 0.0 & 4.2 $\rightarrow$ 0.0 & 3.4 $\rightarrow$ 0.0 & 0.0 $\rightarrow$ 0.0 \\
+TituLLM-1B-Instruct & 1.4 $\rightarrow$ 5.8 & 0.0 $\rightarrow$ 2.9 & 0.0 $\rightarrow$ 1.5 & 0.0 $\rightarrow$ 0.0 \\
+TigerLLM-1B & 7.2 $\rightarrow$ 2.9 & 4.3 $\rightarrow$ 2.9 & 1.5 $\rightarrow$ 3.0 & 4.4 $\rightarrow$ 0.0 \\
+TituLLM-3B-Instruct & 1.4 $\rightarrow$ 1.4 & 1.4 $\rightarrow$ 1.4 & 1.5 $\rightarrow$ 1.5 & 0.0 $\rightarrow$ 0.0 \\
+Qwen3-0.6B & 2.9 $\rightarrow$ 8.7 & 4.3 $\rightarrow$ 4.3 & 4.5 $\rightarrow$ 9.0 & 2.2 $\rightarrow$ 0.0 \\
+Qwen3-1.7B & 17.4 $\rightarrow$ 21.7 & 20.3 $\rightarrow$ 20.3 & 13.4 $\rightarrow$ 19.4 & 15.6 $\rightarrow$ 6.7 \\
+Qwen3-4B & 59.4 $\rightarrow$ 55.1 & 44.9 $\rightarrow$ 34.8 & 40.3 $\rightarrow$ 40.3 & 28.9 $\rightarrow$ 22.2 \\
+\hline
+\end{tabular}
+\multicolumn{1}{l}{\small All values are percentages, before $\rightarrow$ after.}
+\end{table*}
