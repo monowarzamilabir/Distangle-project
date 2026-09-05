@@ -5,8 +5,12 @@ Bengali reasoning traces, on the same 250 held-out items per model
 $\Delta$ is the paired risk difference in percentage points with its 95\%
 confidence interval; it is the effect size, and it is reported because a
 $p$-value alone does not bound how large the change could be. $p$ is a
-two-sided exact McNemar test on the discordant pairs. Notice that every
-$\Delta$ interval contains zero.}
+two-sided exact McNemar test on the discordant pairs. Notice that no
+comparison reaches significance and that six of the seven $\Delta$
+intervals contain zero. The exception is TituLLM-1B-Instruct, whose
+interval is computed from only eight discordant pairs; the Wald interval
+is anti-conservative at that count and the exact test ($p=0.070$) is the
+reliable reading.}
 \label{tab:main}
 \centering\small
 \begin{tabular}{|l|c|c|c|c|c|c|c|c|}

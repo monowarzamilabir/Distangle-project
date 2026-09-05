@@ -422,7 +422,7 @@ primary depth comparison and retain the base variants as an instruction-tuning
 ablation.
 
 \begin{table}[htbp]
-\caption{Backbones under test}
+\caption{The seven backbones under test. Bengali depth records whether the model received Bengali-specific continued pretraining beyond a general multilingual mix. Parameter counts are total, not trainable; LoRA trains roughly 0.5\% of them.}
 \label{tab:models}
 \centering
 \begin{tabular}{|l|l|c|c|}
@@ -500,10 +500,18 @@ both filters.
 
 \subsection{Evaluation Set}
 
-The evaluation set is 500 problems sampled from GANIT-DEV, stratified by
-difficulty: 145 easy, 127 medium, 129 hard and 99 olympiad. Gold answers are
-short final values rather than worked solutions. All models are evaluated on the
-same items in the same order, so every comparison in this paper is paired.
+The held-out set is 500 problems sampled from GANIT-DEV with seed 42,
+stratified by difficulty: 145 easy, 127 medium, 129 hard and 99 olympiad. Gold
+answers are short final values rather than worked solutions.
+
+Compute constraints on a single consumer GPU limited scoring to the first 250
+items of that shuffled set for every model, and to the first 100 for TituLLM-1B
+base, which was withdrawn from the extension after producing degenerate output
+at 0 to 2\% accuracy across its first hundred items. Every number in this paper
+is therefore reported on 250 items unless stated otherwise. Because the set was
+shuffled before truncation, the scored subset preserves the difficulty mix: 69
+easy, 69 medium, 67 hard and 45 olympiad. All models see the same items in the
+same order, so every before-and-after comparison in this paper is paired.
 
 \subsection{Fine-Tuning Protocol}
 
@@ -532,6 +540,24 @@ backbone receives the same intervention.
 
 All experiments ran on a single NVIDIA RTX 5060 Ti with 16GB of VRAM. Total
 training time across all adapters was approximately 4.4 GPU-hours.
+
+\subsection{Availability and Computational Environment}
+
+All experiments ran under Python 3.11.16 with PyTorch 2.8.0+cu128,
+Transformers 4.57.6 and PEFT 0.20.0, on a single NVIDIA RTX 5060 Ti with 16GB
+of VRAM. Seed 42 was set for Python, NumPy and PyTorch in every run, and all
+generation is greedy, so no sampling randomness enters the results.
+Deterministic CUDA algorithms were not enabled, because the throughput cost was
+prohibitive on this hardware; the consequence is that training losses reproduce
+to roughly three decimal places rather than exactly, while greedy generations
+are stable.
+
+The curation notebook, the training and evaluation harness, the shared answer
+scorer with its executable test suite, and the analysis scripts that regenerate
+every table, figure and reported number in this paper from the stored model
+outputs are available at [REPOSITORY URL]. The exact environment record,
+including package versions and the reproducibility caveats above, is committed
+as \texttt{environment.json}.
 
 \subsection{Evaluation Protocol}
 
@@ -583,9 +609,25 @@ Bengali character ratio are reported as mean paired differences with 95\%
 confidence intervals, and treated as significant when the interval excludes
 zero.
 
+Every before-and-after comparison is reported with a paired risk difference
+$\Delta$ and its 95\% confidence interval alongside the $p$-value, because a
+$p$-value alone says whether an effect is distinguishable from zero but not how
+large it could plausibly be. Where the two disagree we treat the exact test as
+authoritative: the Wald interval on a paired difference is anti-conservative
+when the discordant counts are very small, which happens here for
+TituLLM-1B-Instruct with eight discordant pairs.
+
 We report significance tests rather than raw differences throughout because
-accuracies in this study are low. At 3\% accuracy on 500 items, a difference of
+accuracies in this study are low. At 3\% accuracy on 250 items, a difference of
 three correct answers looks like a trend and is not one.
+
+No correction for multiple comparisons is applied. Seven McNemar tests, three
+Fisher tests and seven sign tests are reported. Since every McNemar result is
+null, a correction could only make them more null and would not change any
+conclusion; the Fisher and sign-test results survive Bonferroni correction at
+$\alpha=0.05$ by several orders of magnitude. Readers should nonetheless treat
+the single borderline value, $p=0.070$ for TituLLM-1B-Instruct, as weaker than
+it looks in isolation.
 
 
 
@@ -603,19 +645,26 @@ would predict.
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\linewidth]{fig_scale.png}
-\caption{Accuracy on held-out Bengali mathematics against parameter count.
-Bars are Wilson 95\% intervals. The models with deep Bengali pretraining
-(TituLLM, TigerLLM) sit flat near the floor across a threefold range of
-parameters, while the models with only incidental Bengali coverage climb
-steeply with scale.}
+\caption{Exact-match accuracy on held-out Bengali mathematics word problems,
+plotted against total parameter count, for all seven backbones as released and
+before any fine-tuning. Each model is scored on the same 250 items (100 for
+TituLLM-1B base); vertical bars are Wilson 95\% intervals and the horizontal
+axis is logarithmic. The line joins members of the Qwen3 family and is a visual
+guide, not a fitted trend. Notice that the four models with deep Bengali
+pretraining sit flat near the floor across a threefold range of parameters,
+while the three with only incidental Bengali coverage climb steeply with
+scale.}
 \label{fig:scale}
 \end{figure}
 
 Within the Qwen3 family, which received no Bengali-specific pretraining beyond
 whatever appears in a general multilingual mix, accuracy rises monotonically
-and steeply: 3.6\% at 0.6B, 16.8\% at 1.7B, and 44.8\% at 4B. That is better
-than an order of magnitude of improvement across less than one order of
-magnitude of parameters.
+and steeply: 3.6\% at 0.6B, 16.8\% at 1.7B, and 44.8\% at 4B. Every adjacent
+step is significant under an unpaired Fisher exact test: $p=1.0\times10^{-6}$
+from 0.6B to 1.7B, $p=1.3\times10^{-11}$ from 1.7B to 4B, and
+$p=7.4\times10^{-30}$ across the full ladder. That is better than an order of
+magnitude of improvement across less than one order of magnitude of
+parameters.
 
 The Bengali-specialised models show no such gradient. TituLLM-1B-Instruct
 reaches 0.4\%, TituLLM-1B base 2.0\%, TigerLLM-1B 4.4\%, and TituLLM-3B-Instruct
@@ -626,8 +675,8 @@ The sharpest single comparison is TituLLM-3B-Instruct against Qwen3-1.7B.
 TituLLM-3B-Instruct has roughly twice the parameters and was continually
 pretrained on a large Bengali corpus with a tokenizer extended for the
 language. Qwen3-1.7B has neither advantage. Qwen3-1.7B scores 16.8\% against
-TituLLM-3B-Instruct's 1.2\%. The advantage is not an artifact of one difficulty
-tier. The smaller, Bengali-shallow model wins at easy (17.4\% against 1.4\%),
+TituLLM-3B-Instruct's 1.2\% (Fisher exact, $p=1.7\times10^{-10}$). The
+advantage is not an artifact of one difficulty tier. The smaller, Bengali-shallow model wins at easy (17.4\% against 1.4\%),
 medium (20.3\% against 1.4\%), hard (13.4\% against 1.5\%) and olympiad (15.6\%
 against 0.0\%) alike.
 
@@ -644,33 +693,77 @@ Bengali text, it did not transfer into mathematical competence.
 Table~\ref{tab:main} and Figure~\ref{fig:beforeafter} report the paired
 before-and-after comparison for all seven backbones.
 
-\begin{table}[htbp]
+We report accuracy rather than precision, recall or F1 because the task is
+free-form generation of a numeric answer scored by exact match, not
+classification: there are no classes over which those metrics are defined and
+no confusion matrix to construct. In their place we report the diagnostics that
+do carry information for generative scoring, namely format-failure rate,
+token-cap rate, language adherence, per-difficulty accuracy
+(Table~\ref{tab:difficulty}) and answer retention
+(Table~\ref{tab:retention}).
+
+\begin{table*}[t]
 \caption{Accuracy before and after LIMO-style fine-tuning on 873 curated
-Bengali traces. Intervals are Wilson 95\%. $p$ is an exact McNemar test on
-the discordant pairs. Every comparison is paired on the same items.}
+Bengali reasoning traces, on the same 250 held-out items per model
+(TituLLM-1B base on 100). Intervals on each accuracy are Wilson 95\%.
+$\Delta$ is the paired risk difference in percentage points with its 95\%
+confidence interval; it is the effect size, and it is reported because a
+$p$-value alone does not bound how large the change could be. $p$ is a
+two-sided exact McNemar test on the discordant pairs. Notice that every
+$\Delta$ interval contains zero.}
 \label{tab:main}
 \centering\small
-\begin{tabular}{|l|c|c|c|c|c|c|}
+\begin{tabular}{|l|c|c|c|c|c|c|c|c|}
 \hline
-\textbf{Model} & \textbf{Params} & \textbf{Bn depth} & \textbf{$n$} & \textbf{Before} & \textbf{After} & \textbf{$p$} \\
+\textbf{Model} & \textbf{Params} & \textbf{Bn depth} & \textbf{$n$} & \textbf{Before} & \textbf{After} & \textbf{$\Delta$ (pp)} & \textbf{95\% CI} & \textbf{$p$} \\
 \hline
-TituLLM-1B (base) & 1.0B & deep & 100 & 2.0\% & 0.0\% & 0.500 \\
-TituLLM-1B-Instruct & 1.0B & deep & 250 & 0.4\% & 2.8\% & 0.070 \\
-TigerLLM-1B & 1.0B & deep & 250 & 4.4\% & 2.4\% & 0.267 \\
-TituLLM-3B-Instruct & 3.2B & deep & 250 & 1.2\% & 1.2\% & 1.000 \\
-Qwen3-0.6B & 0.6B & shallow & 250 & 3.6\% & 6.0\% & 0.210 \\
-Qwen3-1.7B & 1.7B & shallow & 250 & 16.8\% & 18.0\% & 0.780 \\
-Qwen3-4B & 4.0B & shallow & 250 & 44.8\% & 39.6\% & 0.228 \\
+TituLLM-1B (base) & 1.0B & deep & 100 & 2.0\% & 0.0\% & -2.0 & [-4.7, +0.7] & 0.500 \\
+TituLLM-1B-Instruct & 1.0B & deep & 250 & 0.4\% & 2.8\% & +2.4 & [+0.2, +4.6] & 0.070 \\
+TigerLLM-1B & 1.0B & deep & 250 & 4.4\% & 2.4\% & -2.0 & [-4.8, +0.8] & 0.267 \\
+TituLLM-3B-Instruct & 3.2B & deep & 250 & 1.2\% & 1.2\% & +0.0 & [-1.9, +1.9] & 1.000 \\
+Qwen3-0.6B & 0.6B & shallow & 250 & 3.6\% & 6.0\% & +2.4 & [-0.7, +5.5] & 0.210 \\
+Qwen3-1.7B & 1.7B & shallow & 250 & 16.8\% & 18.0\% & +1.2 & [-4.4, +6.8] & 0.780 \\
+Qwen3-4B & 4.0B & shallow & 250 & 44.8\% & 39.6\% & -5.2 & [-13.0, +2.6] & 0.228 \\
 \hline
 \end{tabular}
-\end{table}
+\end{table*}
+
+\begin{table*}[t]
+\caption{Accuracy by difficulty tier, before and after fine-tuning, for
+every backbone on the same held-out items. Tier counts are 69 easy, 69
+medium, 67 hard and 45 olympiad for the models evaluated on 250 items,
+and 30/24/29/17 for TituLLM-1B base on 100. Notice that the Qwen3
+advantage holds in every tier rather than coming from one band, and that
+no tier shows a consistent post-tuning gain.}
+\label{tab:difficulty}
+\centering\small
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Model} & \textbf{Easy} & \textbf{Medium} & \textbf{Hard} & \textbf{Olympiad} \\
+\hline
+TituLLM-1B (base) & 0.0 $\rightarrow$ 0.0 & 4.2 $\rightarrow$ 0.0 & 3.4 $\rightarrow$ 0.0 & 0.0 $\rightarrow$ 0.0 \\
+TituLLM-1B-Instruct & 1.4 $\rightarrow$ 5.8 & 0.0 $\rightarrow$ 2.9 & 0.0 $\rightarrow$ 1.5 & 0.0 $\rightarrow$ 0.0 \\
+TigerLLM-1B & 7.2 $\rightarrow$ 2.9 & 4.3 $\rightarrow$ 2.9 & 1.5 $\rightarrow$ 3.0 & 4.4 $\rightarrow$ 0.0 \\
+TituLLM-3B-Instruct & 1.4 $\rightarrow$ 1.4 & 1.4 $\rightarrow$ 1.4 & 1.5 $\rightarrow$ 1.5 & 0.0 $\rightarrow$ 0.0 \\
+Qwen3-0.6B & 2.9 $\rightarrow$ 8.7 & 4.3 $\rightarrow$ 4.3 & 4.5 $\rightarrow$ 9.0 & 2.2 $\rightarrow$ 0.0 \\
+Qwen3-1.7B & 17.4 $\rightarrow$ 21.7 & 20.3 $\rightarrow$ 20.3 & 13.4 $\rightarrow$ 19.4 & 15.6 $\rightarrow$ 6.7 \\
+Qwen3-4B & 59.4 $\rightarrow$ 55.1 & 44.9 $\rightarrow$ 34.8 & 40.3 $\rightarrow$ 40.3 & 28.9 $\rightarrow$ 22.2 \\
+\hline
+\end{tabular}
+\multicolumn{1}{l}{\small All values are percentages, before $\rightarrow$ after.}
+\end{table*}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\linewidth]{fig_beforeafter.png}
-\caption{Paired accuracy before and after fine-tuning on 873 curated traces.
-Hollow markers are the untuned base, filled markers the adapter. No model
-crosses the 0.05 threshold.}
+\caption{Exact-match accuracy for each backbone before and after LoRA
+fine-tuning on the same 873 curated Bengali traces, scored on the same held-out
+items in both conditions ($n=250$; $n=100$ for TituLLM-1B base). Hollow markers
+are the untuned model, filled markers the adapter, and the thin lines behind
+each marker are Wilson 95\% intervals. $p$ values are two-sided exact McNemar
+tests on the discordant pairs. Notice that the intervals for the two conditions
+overlap substantially for every model, and that no comparison crosses the 0.05
+threshold.}
 \label{fig:beforeafter}
 \end{figure}
 
@@ -693,8 +786,10 @@ capability threshold is evidence about that region, not about the method.
 Qwen3-4B is the one row where the point estimate moved by a visible margin, from
 44.8\% down to 39.6\%. The direction survived the extension from 100 items to
 250, but the significance did not arrive with it: 56 items were lost against 43
-gained, and the exact McNemar test returns $p=0.228$. We therefore do not read a
-real degradation into it. It is worth noting that this is the only model with
+gained, giving $\Delta = -5.2$ percentage points with a 95\% confidence interval
+of $-13.0$ to $+2.6$, and an exact McNemar $p=0.228$. The interval contains zero
+and is wide enough to accommodate a modest gain, so we do not read a real
+degradation into it. It is worth noting that this is the only model with
 enough baseline accuracy for a degradation to have been visible at all.
 
 \subsection{Output Behaviour Changed Even Though Accuracy Did Not}
@@ -739,7 +834,10 @@ should be high and the gains should sit on top of it. That is not the pattern.
 
 \begin{table}[htbp]
 \caption{Answer retention. Of the items each model answered correctly
-before fine-tuning, how many it still answered correctly afterwards.}
+before fine-tuning, how many it still answered correctly afterwards, and
+how many items changed outcome in either direction. Notice that no model
+retained even half of what it already knew, which is why the small net
+changes in Table~\ref{tab:main} understate how much the adapter moved.}
 \label{tab:retention}
 \centering\small
 \begin{tabular}{|l|c|c|c|c|}
@@ -795,7 +893,11 @@ completions contained a well-formed \texttt{<answer>} block and were therefore
 parsed by the strongest branch of the extractor. The remaining 20 exhausted the
 generation budget inside the \texttt{<think>} block and were scored by the weak
 fallback. Of the 56 items Qwen3-4B lost, 45 produced a well-formed
-\texttt{<answer>} that was simply wrong.
+\texttt{<answer>} that was simply wrong. The failures are arithmetic, not
+formatting. On one item with gold answer 16 the tuned model emitted
+\texttt{<answer>0</answer>}; on another with gold 126 it emitted
+\texttt{<answer>14</answer>}. In both cases the extractor read exactly what the
+model wrote.
 
 To bound the effect, we recomputed accuracy crediting every fallback-scored
 item as correct, which is the most generous assumption available. Post-tuning
@@ -824,9 +926,13 @@ least 28 correct out of 32, and trained the same Qwen3-1.7B on it.
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.72\linewidth]{fig_difficulty.png}
-\caption{Qwen3-1.7B under three conditions on the same 250 held-out items.
-Training on easy, well-calibrated data performs significantly worse than
-training on hard data.}
+\caption{Qwen3-1.7B under three conditions, scored on the same 250 held-out
+items, with backbone, LoRA configuration, seed, prompt and evaluation items
+held fixed so that training-data difficulty is the only thing that varies. The
+easy-data adapter is significantly worse than the hard-data adapter (exact
+McNemar, $p=0.039$); against the untuned base it is lower but not significantly
+so ($p=0.126$), as marked. Notice that easier, better-calibrated training data
+did not rescue the null result and if anything moved accuracy the wrong way.}
 \label{fig:difficulty}
 \end{figure}
 
@@ -835,6 +941,11 @@ and 16.8\% for the untuned base. The gap between the two adapters is
 significant (exact McNemar, 27 items lost against 13 gained, $p=0.039$), and it
 runs in the opposite direction to the objection. Easier, better-calibrated
 training data did not rescue the null. It made results worse.
+
+Against the untuned base, by contrast, the easy-data adapter is lower but not
+significantly so (12.4\% against 16.8\%, exact McNemar $p=0.126$). The claim we
+can defend is the narrower one: easier data is significantly worse than harder
+data, not that it is significantly worse than no tuning at all.
 
 This closes the difficulty explanation. The models can learn from calibrated
 data, and doing so does not improve held-out reasoning and may actively harm it.
@@ -848,17 +959,22 @@ Table~\ref{tab:tokenizer} reports token counts for the same 873 training
 traces under each tokenizer.
 
 \begin{table}[htbp]
-\caption{Tokens required for identical Bengali reasoning traces, measured
-on the 873 curated training traces.}
+\caption{Tokens required to represent the same 873 training sequences
+under each tokenizer, measured on the full sequence train\_lora.py
+builds: shared Bengali instruction, problem, model-specific prompt
+formatting, and reasoning trace. Vocabulary sizes include added tokens.
+Notice that the two Bengali-adapted tokenizers need roughly a third as
+many tokens as Qwen3 for identical content, and that this efficiency is
+not reflected in the accuracies of Table~\ref{tab:main}.}
 \label{tab:tokenizer}
 \centering
 \begin{tabular}{|l|c|c|c|c|}
 \hline
 \textbf{Tokenizer} & \textbf{Vocab} & \textbf{Median} & \textbf{p95} & \textbf{Max} \\
 \hline
-TituLLM-1B  & 170,497 & 397   & 873   & 1,500 \\
-TigerLLM-1B & 262,145 & 428   & 933   & 1,434 \\
-Qwen3       & 151,669 & 1,245 & 2,396 & 3,104 \\
+TituLLM-1B & 170,497 & 395 & 871 & 1,498 \\
+TigerLLM-1B & 262,145 & 425 & 930 & 1,431 \\
+Qwen3 & 151,669 & 1,244 & 2,395 & 3,543 \\
 \hline
 \end{tabular}
 \end{table}
@@ -963,6 +1079,37 @@ TituLLM-3B-Instruct fell from 97.9\% to 80.8\% and TituLLM-1B-Instruct from
 85.6\% to 87.8\%. Training on Bengali reasoning traces made most of these
 models write less Bengali, not more.
 
+Table~\ref{tab:adherence} reports the paired differences with their
+95\% confidence intervals. In all six declining models the interval
+excludes zero. Qwen3-0.6B is the exception in both directions: its mean
+rose by 2.1 points but the interval spans zero ($-1.2$ to $+5.4$), so we
+do not claim it improved, even though more of its individual items fell
+than rose.
+
+\begin{table}[htbp]
+\caption{Bengali character ratio in generated output, before and after
+fine-tuning on Bengali reasoning traces. $\Delta$ is the mean paired
+difference in percentage points with its 95\% confidence interval; $p$ is
+a two-sided exact sign test on the per-item direction of change. Notice
+that training on Bengali traces moved six of seven models away from
+Bengali, and moved them furthest in the models that started most Bengali.}
+\label{tab:adherence}
+\centering\small
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Model} & \textbf{Before} & \textbf{After} & \textbf{$\Delta$ (pp), 95\% CI} & \textbf{$p$} \\
+\hline
+TituLLM-1B (base) & 90.7\% & 82.1\% & -8.6 [-15.8, -1.5] & $<10^{-6}$ \\
+TituLLM-1B-Instruct & 98.3\% & 81.3\% & -17.0 [-19.6, -14.3] & $<10^{-6}$ \\
+TigerLLM-1B & 87.0\% & 82.7\% & -4.3 [-6.4, -2.3] & $<10^{-6}$ \\
+TituLLM-3B-Instruct & 97.9\% & 80.8\% & -17.1 [-19.7, -14.6] & $<10^{-6}$ \\
+Qwen3-0.6B & 85.6\% & 87.8\% & +2.1 [-1.2, +5.4] & $<10^{-6}$ \\
+Qwen3-1.7B & 89.3\% & 84.1\% & -5.1 [-7.3, -2.9] & $<10^{-6}$ \\
+Qwen3-4B & 87.0\% & 82.0\% & -5.0 [-6.4, -3.6] & $<10^{-6}$ \\
+\hline
+\end{tabular}
+\end{table}
+
 The likely cause is in the traces themselves. Ganit's reasoning contains LaTeX,
 ASCII numerals and English mathematical notation, and models trained on it learn
 to write mathematics the way the traces do. This connects directly to the
@@ -1039,7 +1186,7 @@ parameter scale or by targeted Bengali pretraining, and whether minimal-data
 elicitation transfers to model sizes and languages outside the settings where it
 was demonstrated.
 
-Scale determines performance: within a single model family holding
+Scale predicts performance: within a single model family holding
 pretraining constant, accuracy rose from 3.6\% at 0.6B to 16.8\% at 1.7B to
 44.8\% at 4B. Targeted Bengali pretraining does not: a
 $3{,}700\times$ difference produced no significant effect. This contradicts the
@@ -1097,7 +1244,12 @@ The research questions, the experimental design, the data curation pipeline and
 the selection of models and datasets are the authors' own. Every number
 reported here was produced by scripts in the project repository, and outputs
 were checked against raw model completions rather than accepted from summary
-statistics alone. The authors reviewed all AI-assisted text and code, and take
+statistics alone. No data were generated, altered or imputed by an AI system: every number
+reported here comes from a model checkpoint evaluated on stored held-out items,
+and no finding, citation or result was produced by the assistant without a
+corresponding computation in the repository. Interpretation of the results,
+including the decision about what the null result does and does not license, is
+the authors' own. The authors reviewed all AI-assisted text and code, and take
 full responsibility for the content of this paper, including any remaining
 errors.
 

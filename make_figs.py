@@ -149,7 +149,7 @@ ax.text(1.0, 25.8, "vs base: p = 0.126, n.s.", ha="center",
         fontsize=7.5, color="#6b7280")
 ax.set_ylabel("Accuracy (%)")
 ax.set_ylim(0, 29)
-ax.set_title("Qwen3-1.7B: easier training data is\nsignificantly worse, not better",
+ax.set_title("Qwen3-1.7B: easier training data did not\nrescue the null result",
              fontsize=9.5, pad=8)
 save(fig, "fig_difficulty")
 
